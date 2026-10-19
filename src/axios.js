@@ -14,9 +14,28 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
     (response) => response,
-    (error) => {
+   async (error) => {
         if (error.response?.status === 401) {
-            useStore.getState().logout();
+            const originalRequest = error.config;
+            try
+            {
+                const response = await axios.get('https://blog-backend-production-3557.up.railway.app/auth/refresh',{
+                    withCredentials:true,
+                });
+
+                const newToken = response.data.Token;
+                localStorage.setItem('Token',newToken);
+                return api.request(originalRequest)
+            }
+            catch(refreshError)
+            {
+                localStorage.removeItem('Token');
+                useStore.getState().logout();
+                window.location.href = '/signIn';
+                return Promise.reject(refreshError);
+
+            }
+
         }
         return Promise.reject(error);
     }
