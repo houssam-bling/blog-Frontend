@@ -1,7 +1,8 @@
 import axios from 'axios'
 import {useStore} from './store'
 export const api = axios.create({
-    baseURL:'https://blog-backend-production-3557.up.railway.app'
+    baseURL:'https://blog-backend-production-3557.up.railway.app',
+    withCredentials:true,
 })
 
 api.interceptors.request.use((config) => {
