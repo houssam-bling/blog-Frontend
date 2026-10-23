@@ -1,97 +1,127 @@
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
-import {useSignUp} from './useSign'
-import {useStore} from './store'
+import { useSignUp } from './useSign'
+import { useStore } from './store'
+import { toast } from "react-hot-toast";
+
+
+const MONO = "'IBM Plex Mono', ui-monospace, monospace";
+const DISPLAY = "'Newsreader', 'Amiri', 'Noto Naskh Arabic', Georgia, serif";
+const SANS = "'Noto Sans Arabic', system-ui, -apple-system, sans-serif";
+
+const CLAY = "#b5714d";
+const AMBER = "#c99a4a";
+
+const fieldClass = "w-full bg-white border border-stone-200 rounded-lg px-3.5 py-2.5 text-[14px] text-stone-800 placeholder:text-stone-400 focus:outline-none focus:border-stone-800 transition-colors";
+
 export default function SignUpPage() {
-    const {register,handleSubmit,formState: { errors }} = useForm({
-        defaultValues:{
-            fullname:'',
-            email:'',
-            password:"",
-            gender:'',
-        }
+    const { register, handleSubmit, formState: { errors } } = useForm({
+        defaultValues: { fullname: '', email: '', password: "", gender: '', }
     })
     const navigate = useNavigate();
-    const {mutate,isPending} = useSignUp();
-    const setUser = useStore((set)=>set.setUser);
+    const { mutate, isPending } = useSignUp();
+    const setUser = useStore((set) => set.setUser);
 
-    const Sumbit = (input)=>
-    {
-        mutate(input,{
-            onSuccess:(data)=>
-            {
+    const Sumbit = (input) => {
+        mutate(input, {
+            onSuccess: (data) => {
+                toast.success('تم التسجيل بنجاح')
                 setUser(data.User)
-                localStorage.setItem('Token', data.token) 
+                localStorage.setItem('Token', data.token)
                 navigate("/")
             },
-            onError:(e)=>
-            {
-                console.log(e.message)
-            }
+            onError: (e) => { toast.error(e.message)
+ }
         })
     }
+
     return (
-        <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-6">
-            <div className="bg-gray-800 border border-gray-700/80 rounded-2xl p-8 max-w-md w-full shadow-xl my-8">
-                <h1 className="text-2xl font-bold mb-6 text-center text-cyan-400">إنشاء حساب جديد</h1>
-                
-                <form className="space-y-4" onSubmit = {handleSubmit(Sumbit)}>
-                    {/* الاسم الكامل Full Name */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-1">الاسم الكامل</label>
-                        <input 
-                            type="text" 
-                            {...register('fullname',{required:true})}
-                            placeholder="Full Name" 
-                            className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500 transition-colors text-sm"
-                        />
+        <div className="min-h-screen bg-[#fdfbf8] flex items-center justify-center p-6">
+            <div className="w-full max-w-md">
+
+                <div className="bg-white border border-stone-200/80 rounded-2xl p-7 sm:p-9">
+
+                    {/* Kicker */}
+                    <div className="flex items-baseline gap-3 mb-6">
+                        <span className="text-[10px] uppercase tracking-[0.28em] font-bold" style={{ fontFamily: MONO, color: CLAY }}>Account</span>
+                        <span className="h-px flex-1 self-center" style={{ backgroundColor: '#e7e0d6' }} aria-hidden />
+                        <span className="text-[10px] uppercase tracking-[0.2em]" style={{ fontFamily: MONO, color: AMBER }}>Register</span>
                     </div>
 
-                    {/* البريد الإلكتروني Email */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-1">البريد الإلكتروني</label>
-                        <input  {...register('email',{required:true})}
+                    <h1 className="text-[28px] leading-[1.2] font-medium tracking-[-0.01em] text-stone-900 mb-1.5" style={{ fontFamily: DISPLAY }}>
+                        إنشاء حساب جديد
+                    </h1>
+                    <p className="text-[13px] text-stone-500 mb-7" style={{ fontFamily: SANS }}>
+                        ابدأ بخطوة صغيرة — سطر واحد في كل مرة.
+                    </p>
 
-                            type="email" 
-                            placeholder="name@example.com" 
-                            className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500 transition-colors text-sm"
-                        />
-                    </div>
-                    {/* كلمة المرور Password */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-1">كلمة المرور</label>
-                        <input  {...register('password',{required:true})}
-                            type="password" 
-                            placeholder="••••••••" 
-                            className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500 transition-colors text-sm"
-                        />
-                    </div>
+                    <form className="space-y-4" onSubmit={handleSubmit(Sumbit)}>
 
-                    {/* الجنس Gender */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-1">الجنس</label>
-                        <select  {...register('gender',{required:true})}
-                            className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500 transition-colors text-sm">
-                            <option value="">اختر الجنس</option>
-                            <option value="male">ذكر</option>
-                            <option value="female">أنثى</option>
-                        </select>
-                    </div>
-                    {/* زر التسجيل */}
-                    <button disabled = {isPending}
-                        type="submit" 
-                        className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-medium py-2.5 rounded-lg transition-colors text-sm mt-4 shadow"
-                    >
+                        <div>
+                            <label className="block text-[11px] text-stone-500 mb-1.5 tracking-wide" style={{ fontFamily: SANS }}>الاسم الكامل</label>
+                            <input
+                                type="text"
+                                {...register('fullname', { required: true })}
+                                placeholder="Full Name"
+                                className={fieldClass}
+                                style={{ fontFamily: SANS }}
+                            />
+                        </div>
 
-                       {isPending ? 'جاري الانتظار...' :  'إنشاء الحساب'}
-                    </button>
-                </form>
+                        <div>
+                            <label className="block text-[11px] text-stone-500 mb-1.5 tracking-wide" style={{ fontFamily: SANS }}>البريد الإلكتروني</label>
+                            <input
+                                {...register('email', { required: true })}
+                                type="email"
+                                placeholder="name@example.com"
+                                className={fieldClass}
+                                style={{ fontFamily: SANS }}
+                                dir="ltr"
+                            />
+                        </div>
 
-                <div className="mt-6 text-center text-sm text-gray-400">
-                    <Link to="/signin" className="text-cyan-400 hover:underline">
-                        لديك حساب بالفعل؟ تسجيل الدخول
-                    </Link>
+                        <div>
+                            <label className="block text-[11px] text-stone-500 mb-1.5 tracking-wide" style={{ fontFamily: SANS }}>كلمة المرور</label>
+                            <input
+                                {...register('password', { required: true })}
+                                type="password"
+                                placeholder="••••••••"
+                                className={fieldClass}
+                                style={{ fontFamily: SANS }}
+                                dir="ltr"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-[11px] text-stone-500 mb-1.5 tracking-wide" style={{ fontFamily: SANS }}>الجنس</label>
+                            <select
+                                {...register('gender', { required: true })}
+                                className={fieldClass}
+                                style={{ fontFamily: SANS }}
+                            >
+                                <option value="">اختر الجنس</option>
+                                <option value="male">ذكر</option>
+                                <option value="female">أنثى</option>
+                            </select>
+                        </div>
+
+                        <button
+                            disabled={isPending}
+                            type="submit"
+                            className="w-full bg-stone-800 hover:bg-stone-900 disabled:opacity-60 text-white font-medium py-2.5 rounded-lg transition-colors text-[13px] mt-3"
+                            style={{ fontFamily: SANS }}
+                        >
+                            {isPending ? 'جاري الانتظار...' : 'إنشاء الحساب'}
+                        </button>
+                    </form>
                 </div>
+
+                <p className="mt-6 text-center text-[12px] text-stone-500" style={{ fontFamily: SANS }}>
+                    لديك حساب بالفعل؟{' '}
+                    <Link to="/signIn" className="font-medium no-underline transition-colors hover:opacity-80" style={{ color: CLAY }}>
+                        تسجيل الدخول
+                    </Link>
+                </p>
             </div>
         </div>
     );

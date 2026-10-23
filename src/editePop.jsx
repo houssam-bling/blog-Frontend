@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useStore } from './store';
 import { useEditeUser } from './useUser';
+import { MONO, DISPLAY, SANS, CLAY, AMBER, fieldClass } from './tokens';
+import { toast } from "react-hot-toast";
 
 export default function EditUserPop() {
     const theUser = useStore((state) => state.theUser);
     const setediteUserPopFalse = useStore((state) => state.setediteUserPopFalse);
-    
-    // ✅ زدنا email هنا
+
     const [fullname, setFullname] = useState(theUser?.fullname || "");
     const [email, setEmail] = useState(theUser?.email || "");
     const [gender, setGender] = useState(theUser?.gender || "male");
@@ -17,84 +18,94 @@ export default function EditUserPop() {
         e.preventDefault();
         if (!fullname.trim() || !email.trim()) return;
 
-        // ✅ نبعثو email للباك إند
         updateProfile(
-            { fullname, email, gender }, 
+            { fullname, email, gender },
             {
-                onSuccess: () => {
+                onSuccess: () =>{
                     setediteUserPopFalse();
+                    toast.success('تم تعديل المعلومات الشخصية')
                 },
                 onError: (e) => {
-                    console.log(e.message);
-                }
+                    toast.error(e.message)
+                },
             }
         );
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-            <div className="bg-gray-800 border border-gray-700 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
-                
-                <button onClick={setediteUserPopFalse}
-                    className="absolute top-4 left-4 text-gray-400 hover:text-white transition-colors text-lg"
-                >
-                    ✕
-                </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/30 backdrop-blur-sm p-4">
+            <div className="bg-white border border-stone-200/80 rounded-2xl w-full max-w-lg p-7 relative" role="dialog" aria-modal="true">
 
-                <h2 className="text-xl font-bold text-cyan-400 mb-6">تعديل الملف الشخصي</h2>
+                <button
+                    onClick={setediteUserPopFalse}
+                    className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-md text-stone-400 hover:text-stone-900 hover:bg-stone-50 transition-colors text-sm"
+                    aria-label="Close"
+                >✕</button>
+
+                {/* Kicker */}
+                <div className="flex items-baseline gap-3 mb-5 pr-8">
+                    <span className="text-[10px] uppercase tracking-[0.28em] font-bold" style={{ fontFamily: MONO, color: CLAY }}>Profile</span>
+                    <span className="h-px flex-1 self-center" style={{ backgroundColor: '#e7e0d6' }} aria-hidden />
+                    <span className="text-[10px] uppercase tracking-[0.2em]" style={{ fontFamily: MONO, color: AMBER }}>Edit</span>
+                </div>
+
+                <h2 className="text-[22px] leading-tight font-medium text-stone-900 mb-6" style={{ fontFamily: DISPLAY }}>
+                    تعديل الملف الشخصي
+                </h2>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* حقل الاسم */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-1">الاسم الكامل</label>
-                        <input 
-                            type="text" 
+                        <label className="block text-[11px] text-stone-500 mb-1.5 tracking-wide" style={{ fontFamily: SANS }}>الاسم الكامل</label>
+                        <input
+                            type="text"
                             value={fullname}
                             onChange={(e) => setFullname(e.target.value)}
-                            placeholder="أدخل اسمك..." 
+                            placeholder="أدخل اسمك..."
                             required
-                            className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500 transition-colors text-sm"
+                            className={fieldClass}
+                            style={{ fontFamily: SANS }}
                         />
                     </div>
 
-                    {/* ✅ حقل الإيميل */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-1">البريد الإلكتروني</label>
-                        <input 
-                            type="email" 
+                        <label className="block text-[11px] text-stone-500 mb-1.5 tracking-wide" style={{ fontFamily: SANS }}>البريد الإلكتروني</label>
+                        <input
+                            type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            placeholder="name@example.com" 
+                            placeholder="name@example.com"
                             required
-                            className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500 transition-colors text-sm"
+                            className={fieldClass}
+                            style={{ fontFamily: SANS }}
+                            dir="ltr"
                         />
                     </div>
 
-                    {/* حقل الجنس */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-1">الجنس</label>
-                        <select 
+                        <label className="block text-[11px] text-stone-500 mb-1.5 tracking-wide" style={{ fontFamily: SANS }}>الجنس</label>
+                        <select
                             value={gender}
                             onChange={(e) => setGender(e.target.value)}
-                            className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500 transition-colors text-sm"
+                            className={fieldClass}
+                            style={{ fontFamily: SANS }}
                         >
                             <option value="male">ذكر</option>
                             <option value="female">أنثى</option>
                         </select>
                     </div>
 
-                    {/* أزرار التحكم */}
-                    <div className="flex items-center justify-end space-x-3 space-x-reverse pt-2">
-                        <button onClick={setediteUserPopFalse}
-                            type="button" 
-                            className="bg-gray-700 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                        >
-                            إلغاء
-                        </button>
-                        <button 
-                            type="submit" 
+                    <div className="flex items-center justify-end gap-2 pt-3">
+                        <button
+                            onClick={setediteUserPopFalse}
+                            type="button"
+                            className="px-4 py-2 rounded-lg text-[13px] text-stone-600 border border-stone-200 hover:border-stone-400 hover:bg-stone-50 transition-colors"
+                            style={{ fontFamily: SANS }}
+                        >إلغاء</button>
+                        <button
+                            type="submit"
                             disabled={isPending}
-                            className="bg-cyan-500 hover:bg-cyan-600 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors shadow"
+                            className="px-5 py-2 rounded-lg text-[13px] font-medium bg-stone-800 text-white hover:bg-stone-900 disabled:opacity-60 transition-colors"
+                            style={{ fontFamily: SANS }}
                         >
                             {isPending ? "جاري الحفظ..." : "حفظ التعديلات"}
                         </button>

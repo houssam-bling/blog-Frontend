@@ -32,3 +32,9 @@ export function useSignIn()
 {
     return useMutation({mutationFn:(inputForm)=>signIn(inputForm)})
 }
+
+const Logout = async()=> (await api.post('/auth/LogOut')).data;
+
+export const useLogout = ()=> useMutation({mutationFn:Logout})
+
+

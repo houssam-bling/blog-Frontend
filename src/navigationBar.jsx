@@ -1,185 +1,170 @@
 import { Link, useNavigate } from "react-router";
 import { useState } from "react";
 import { useStore } from './store';
+import { useLogout } from "./useSign";
+import { toast } from "react-hot-toast";
+
+const MONO = "'IBM Plex Mono', ui-monospace, monospace";
+const DISPLAY = "'Newsreader', 'Amiri', 'Noto Naskh Arabic', Georgia, serif";
+const SANS = "'Noto Sans Arabic', system-ui, -apple-system, sans-serif";
+
+const CLAY = "#b5714d";
+const SAGE = "#6b8a6b";
+const ROSE = "#b5727a";
 
 export default function NavBar() {
     const navigate = useNavigate();
     const setAddPopTrue = useStore((set) => set.setAddPopTrue);
-    const user = useStore((set)=>set.theUser);
-    const logout = useStore((set)=>set.logout);
+    const setPopMode = useStore((set) => set.setPopMode);
+    const setthePostNull = useStore((set) => set.setthePostNull);
+    const user = useStore((set) => set.theUser);
+    const logout = useStore((set) => set.logout);
 
+    const { mutate: logOut, isPending } = useLogout();
 
     const [isOpen, setIsOpen] = useState(false);
 
-    const handleClick = function () {
-        logout();
-        navigate('/');
-        setIsOpen(false);
+    const handleClick = () => {
+        logOut(null, {
+            onSuccess: () => {
+                toast.success("تم تسجيل الخروج")
+                logout();
+                navigate('/');
+                setIsOpen(false);
+            },
+            onError: (e) => { toast.error('حدث خطا') },
+        });
     };
 
     const closeMenu = () => setIsOpen(false);
 
     const handleAddPost = () => {
+        setPopMode("add");
+        setthePostNull();
         setAddPopTrue();
         setIsOpen(false);
     };
 
-
     return (
-        <nav className="sticky top-0 z-50 bg-gradient-to-l from-slate-900 via-slate-800 to-slate-900 text-white shadow-lg border-b border-slate-700/50 backdrop-blur-sm">
-            <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+        <nav className="sticky top-0 z-50 bg-white border-b border-stone-200/80">
+            <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
 
-                {/* Logo / Brand */}
-                <Link
-                    to="/"
-                    onClick={closeMenu}
-                    className="flex items-center gap-2 text-xl font-bold text-white no-underline hover:text-cyan-400 transition-colors"
-                >
-                    <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-white shadow-md">
-                        ✎
+                {/* Brand */}
+                <Link to="/" onClick={closeMenu} className="flex items-center gap-2.5 no-underline shrink-0">
+                    <span
+                        className="w-7 h-7 rounded-md flex items-center justify-center border text-[13px] leading-none"
+                        style={{ color: CLAY, borderColor: '#e8dcd0', backgroundColor: '#faf5ee' }}
+                        aria-hidden
+                    >✎</span>
+                    <span className="text-[17px] font-medium text-stone-900" style={{ fontFamily: DISPLAY }}>
+                        مدونتي
                     </span>
-                    <span>مدونتي</span>
                 </Link>
 
-                {/* Center Links - Desktop */}
-                <ul className="hidden md:flex list-none gap-2 m-0 p-0 items-center">
+                {/* Center links (desktop) */}
+                <ul className="hidden md:flex items-center gap-1 list-none m-0 p-0">
                     <li>
                         <Link
                             to="/"
-                            className="text-slate-200 no-underline text-sm font-medium px-4 py-2 rounded-lg hover:bg-slate-700/60 hover:text-white transition-all"
-                        >
-                            الرئيسية
-                        </Link>
+                            className="px-3 py-1.5 rounded-md text-[13px] text-stone-600 hover:text-stone-900 hover:bg-stone-50 no-underline transition-colors"
+                            style={{ fontFamily: SANS }}
+                        >الرئيسية</Link>
                     </li>
                     {user && (
                         <li>
                             <Link
-                                to={`/profile`}
-                                className="text-slate-200 no-underline text-sm font-medium px-4 py-2 rounded-lg hover:bg-slate-700/60 hover:text-white transition-all"
-                            >
-                                الملف الشخصي
-                            </Link>
+                                to="/profile"
+                                className="px-3 py-1.5 rounded-md text-[13px] text-stone-600 hover:text-stone-900 hover:bg-stone-50 no-underline transition-colors"
+                                style={{ fontFamily: SANS }}
+                            >الملف الشخصي</Link>
                         </li>
                     )}
                 </ul>
 
-                {/* Actions - Desktop */}
+                {/* Actions (desktop) */}
                 {user && (
-                    <div className="hidden md:flex items-center gap-2">
+                    <div className="hidden md:flex items-center gap-2 shrink-0">
                         <button
-                            onClick={setAddPopTrue}
-                            className="flex items-center gap-1.5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md hover:shadow-lg transition-all active:scale-95"
+                            onClick={handleAddPost}
+                            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-[12px] font-medium border transition-colors hover:brightness-[0.97]"
+                            style={{ fontFamily: SANS, color: SAGE, borderColor: '#d8e2d4', backgroundColor: '#f5f8f3' }}
                         >
-                            <span className="text-base leading-none">＋</span>
+                            <span className="text-[14px] leading-none">+</span>
                             اضافة منشور
                         </button>
                         <button
                             onClick={handleClick}
-                            className="flex items-center gap-1.5 bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md hover:shadow-lg transition-all active:scale-95"
+                            disabled={isPending}
+                            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-[12px] font-medium border border-transparent hover:bg-[#fbf1ee] transition-colors disabled:opacity-60"
+                            style={{ fontFamily: SANS, color: ROSE }}
                         >
-                            <span className="text-base leading-none">⏻</span>
-                            تسجيل الخروج
+                            <span className="text-[14px] leading-none">⏻</span>
+                            {isPending ? '...' : 'تسجيل الخروج'}
                         </button>
                     </div>
                 )}
 
                 {!user && (
-                    <div className="hidden md:flex items-center gap-2">
+                    <div className="hidden md:flex items-center gap-2 shrink-0">
                         <Link
                             to="/signIn"
-                            className="text-slate-200 hover:text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-slate-700/60 transition-all no-underline"
-                        >
-                            Sign In
-                        </Link>
+                            className="px-3.5 py-1.5 rounded-md text-[12px] text-stone-600 hover:text-stone-900 hover:bg-stone-50 no-underline transition-colors"
+                            style={{ fontFamily: MONO, letterSpacing: '0.02em' }}
+                        >Sign In</Link>
                         <Link
                             to="/signUp"
-                            className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md hover:shadow-lg transition-all no-underline active:scale-95"
-                        >
-                            Sign Up
-                        </Link>
+                            className="px-3.5 py-1.5 rounded-md text-[12px] font-medium bg-stone-800 text-white hover:bg-stone-900 no-underline transition-colors"
+                            style={{ fontFamily: MONO, letterSpacing: '0.04em' }}
+                        >Sign Up</Link>
                     </div>
                 )}
 
-                {/* Hamburger Button - Mobile */}
+                {/* Hamburger */}
                 <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className="md:hidden flex flex-col justify-center items-center w-10 h-10 rounded-lg hover:bg-slate-700/60 transition-colors"
+                    className="md:hidden w-9 h-9 flex flex-col justify-center items-center gap-1.25 rounded-md hover:bg-stone-50 transition-colors shrink-0"
                     aria-label="Toggle menu"
                 >
-                    <span className={`block w-6 h-0.5 bg-white rounded transition-all duration-300 ${isOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
-                    <span className={`block w-6 h-0.5 bg-white rounded my-1.5 transition-all duration-300 ${isOpen ? 'opacity-0' : ''}`}></span>
-                    <span className={`block w-6 h-0.5 bg-white rounded transition-all duration-300 ${isOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
+                    <span className={`block w-4 h-px bg-stone-800 transition-all duration-300 ${isOpen ? 'rotate-45 translate-y-1.5' : ''}`} />
+                    <span className={`block w-4 h-px bg-stone-800 transition-all duration-300 ${isOpen ? 'opacity-0' : ''}`} />
+                    <span className={`block w-4 h-px bg-stone-800 transition-all duration-300 ${isOpen ? '-rotate-45 -translate-y-1.5' : ''}`} />
                 </button>
             </div>
 
-            {/* Mobile Menu - Dropdown */}
-            <div
-                className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-                    isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-                }`}
-            >
-                <div className="px-6 py-4 bg-slate-800/95 border-t border-slate-700/50 flex flex-col gap-2">
+            {/* Mobile menu */}
+            <div className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className="px-6 py-4 border-t border-stone-100 bg-white flex flex-col gap-1">
+                    <Link to="/" onClick={closeMenu} className="px-3 py-2.5 rounded-md text-[13px] text-stone-700 hover:bg-stone-50 no-underline transition-colors" style={{ fontFamily: SANS }}>الرئيسية</Link>
+                    {user && <Link to="/profile" onClick={closeMenu} className="px-3 py-2.5 rounded-md text-[13px] text-stone-700 hover:bg-stone-50 no-underline transition-colors" style={{ fontFamily: SANS }}>الملف الشخصي</Link>}
 
-                    {/* Links */}
-                    <Link
-                        to="/"
-                        onClick={closeMenu}
-                        className="text-slate-200 no-underline text-sm font-medium px-4 py-3 rounded-lg hover:bg-slate-700/60 hover:text-white transition-all"
-                    >
-                        🏠 الرئيسية
-                    </Link>
+                    <div className="h-px bg-stone-100 my-2" />
 
-                    {user && (
-                        <Link
-                            to={`/profile`}
-                            onClick={closeMenu}
-                            className="text-slate-200 no-underline text-sm font-medium px-4 py-3 rounded-lg hover:bg-slate-700/60 hover:text-white transition-all"
-                        >
-                            👤 الملف الشخصي
-                        </Link>
-                    )}
-
-                    {/* Divider */}
-                    {(user || !user) && (
-                        <div className="h-px bg-slate-700/50 my-1"></div>
-                    )}
-
-                    {/* Actions */}
                     {user && (
                         <>
                             <button
                                 onClick={handleAddPost}
-                                className="flex items-center justify-center gap-1.5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-4 py-3 rounded-lg text-sm font-semibold shadow-md transition-all active:scale-95"
+                                className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md text-[13px] font-medium border transition-colors"
+                                style={{ fontFamily: SANS, color: SAGE, borderColor: '#d8e2d4', backgroundColor: '#f5f8f3' }}
                             >
-                                <span className="text-base leading-none">＋</span>
+                                <span className="text-[14px] leading-none">+</span>
                                 اضافة منشور
                             </button>
                             <button
                                 onClick={handleClick}
-                                className="flex items-center justify-center gap-1.5 bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 text-white px-4 py-3 rounded-lg text-sm font-semibold shadow-md transition-all active:scale-95"
+                                disabled={isPending}
+                                className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md text-[13px] font-medium hover:bg-[#fbf1ee] transition-colors disabled:opacity-60"
+                                style={{ fontFamily: SANS, color: ROSE }}
                             >
-                                <span className="text-base leading-none">⏻</span>
-                                تسجيل الخروج
+                                <span className="text-[14px] leading-none">⏻</span>
+                                {isPending ? '...' : 'تسجيل الخروج'}
                             </button>
                         </>
                     )}
 
                     {!user && (
                         <>
-                            <Link
-                                to="/signIn"
-                                onClick={closeMenu}
-                                className="text-center text-slate-200 hover:text-white text-sm font-medium px-4 py-3 rounded-lg hover:bg-slate-700/60 transition-all no-underline"
-                            >
-                                Sign In
-                            </Link>
-                            <Link
-                                to="/signUp"
-                                onClick={closeMenu}
-                                className="text-center bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white px-4 py-3 rounded-lg text-sm font-semibold shadow-md transition-all no-underline active:scale-95"
-                            >
-                                Sign Up
-                            </Link>
+                            <Link to="/signIn" onClick={closeMenu} className="px-3 py-2.5 rounded-md text-[13px] text-stone-700 hover:bg-stone-50 no-underline text-center transition-colors" style={{ fontFamily: MONO }}>Sign In</Link>
+                            <Link to="/signUp" onClick={closeMenu} className="px-3 py-2.5 rounded-md text-[13px] font-medium bg-stone-800 text-white hover:bg-stone-900 no-underline text-center transition-colors" style={{ fontFamily: MONO }}>Sign Up</Link>
                         </>
                     )}
                 </div>

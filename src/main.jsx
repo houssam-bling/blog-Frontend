@@ -5,7 +5,14 @@ import App from './App.jsx'
 import {BrowserRouter} from 'react-router'
 import {QueryClientProvider,QueryClient} from '@tanstack/react-query'
 
-const queryclient = new QueryClient();
+const queryclient = new QueryClient({
+  defaultOptions:{
+    queries:{
+      staleTime : 1000 * 60 * 5,
+      refetchOnWindowFocus:false,
+    }
+  }
+});
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
