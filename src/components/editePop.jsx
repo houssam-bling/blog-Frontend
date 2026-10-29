@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useStore } from '../store/store.js';
-import { useEditeUser } from '../useUser';
+import { useEditeUser } from '../hooks/useUser';
 import { MONO, DISPLAY, SANS, CLAY, AMBER, fieldClass } from '../utils/tokens.js';
 import { toast } from "react-hot-toast";
-import { useGetProfile } from "../useUser.js";
-import LoadingPage from '../loadingPage.jsx'
+import { useGetProfile } from "../hooks/useUser.js";
+import LoadingPage from '../pages/loadingPage.jsx'
  
 
 export default function EditUserPop() {

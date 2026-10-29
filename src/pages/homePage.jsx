@@ -1,7 +1,7 @@
-import { useGetAllPosts } from './usePost'
+import { useGetAllPosts } from '../hooks/usePost'
 import LoadingPage from "./loadingPage";
 import ErrorPage from "./errorPage";
-import Post from "./post";
+import Post from "../components/post";
 import { useState,useEffect } from "react";
 
 const MONO = "'IBM Plex Mono', ui-monospace, monospace";

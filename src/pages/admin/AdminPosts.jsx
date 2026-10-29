@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { MONO, DISPLAY, SANS, ROSE } from '../../utils/tokens';
-import { useGetAllPosts, useDeletePost } from '../../usePost';
+import { useGetAllPosts, useDeletePost } from '../../hooks/usePost';
 import { useStore } from '../../store/store';
 import { toast } from 'react-hot-toast';
 

@@ -1,12 +1,12 @@
 import { useParams, useNavigate } from "react-router";
 import { useState } from "react";
-import LoadingPage from "./loadingPage.jsx.jsx";
-import ErrorPage from "./errorPage.jsx.jsx";
+import LoadingPage from "./loadingPage.jsx";
+import ErrorPage from "./errorPage.jsx";
 import CommentItem from '../components/comment.jsx';
-import { useGetPostComments, useAddPostComments } from '../useComment'
-import { useLikePost, useDisLikesPost, useGetSinglePost } from '../usePost'
+import { useGetPostComments, useAddPostComments } from '../hooks/useComment'
+import { useLikePost, useDisLikesPost, useGetSinglePost } from '../hooks/usePost'
 import { MONO, DISPLAY, BODY, SANS, CLAY, SAGE, ROSE, DUSTY, AMBER } from '../utils/tokens.js';
-import { useGetProfile } from "../useUser.js";
+import { useGetProfile } from "../hooks/useUser.js";
 import {toast} from 'react-hot-toast'
 
 

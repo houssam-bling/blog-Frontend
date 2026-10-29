@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { MONO, SANS, BODY, CLAY, ROSE } from './tokens';
-import { useGetProfile } from "./useUser.js";
+import { MONO, SANS, BODY, CLAY, ROSE } from '../utils/tokens';
+import { useGetProfile } from "../hooks/useUser.js";
 import { toast } from "react-hot-toast";
-import { useDeleteCommentById, useUpdateCommentById } from './useComment.js';
+import { useDeleteCommentById, useUpdateCommentById } from '../hooks/useComment.js';
 
 export default function Comment({ comment }) {
     const [showMenu, setShowMenu] = useState(false);

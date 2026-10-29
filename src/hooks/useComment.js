@@ -1,5 +1,5 @@
 import {useQuery,useMutation,useQueryClient, keepPreviousData} from '@tanstack/react-query'
-import  {api} from './axios';
+import  {api} from '../services/axios';
 const getPostComments = async function(id)
 {
     const response = await api.get(`/comments/${id}`)
@@ -55,4 +55,3 @@ export const useDeleteCommentById = function()
 const getAllComments = async ({page = 1,limit = 5}) => (await api.get('/comments',{params:{page,limit}})).data;
 
 export const useGetAllComments = ({page,limit}) => {return useQuery({ queryKey: ["Comments", "all",page,limit], queryFn:()=> getAllComments({page,limit}),placeholderData:keepPreviousData });}
-

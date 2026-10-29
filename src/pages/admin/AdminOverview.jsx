@@ -1,8 +1,8 @@
-import { MONO, DISPLAY, SANS, BODY, CLAY, SAGE, DUSTY } from './tokens';
-import { useGetAllUsers } from './useUser';
-import { useGetAllPosts } from './usePost';
-import { useGetAllComments } from './useComment';
-import { useGetAdminStates } from './useState';
+import { MONO, DISPLAY, SANS, BODY, CLAY, SAGE, DUSTY } from '../../utils/tokens';
+import { useGetAllUsers } from '../../hooks/useUser';
+import { useGetAllPosts } from '../../hooks/usePost';
+import { useGetAllComments } from '../../hooks/useComment';
+import { useGetAdminStates } from '../../hooks/useState';
 
 export default function AdminOverview() {
     // 1. جلب البيانات4

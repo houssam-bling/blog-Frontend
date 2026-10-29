@@ -1,6 +1,6 @@
 import { useState } from 'react'; // 👈 زدنا useState و useEffect
-import { MONO, DISPLAY, BODY, SANS, CLAY, ROSE } from './tokens';
-import { useGetAllComments, useDeleteCommentById } from './useComment';
+import { MONO, DISPLAY, BODY, SANS, CLAY, ROSE } from '../../utils/tokens';
+import { useGetAllComments, useDeleteCommentById } from '../../hooks/useComment';
 import { toast } from 'react-hot-toast';
 
 export default function AdminComments() {

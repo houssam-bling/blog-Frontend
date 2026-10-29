@@ -1,10 +1,10 @@
 import { Link } from "react-router";
 import { useState } from "react";
-import { useDeletePost, useDisLikesPost, useLikePost } from './usePost';
+import { useDeletePost, useDisLikesPost, useLikePost } from '../hooks/usePost';
 import CommentBox from './CommentBox.jsx'
-import { useStore } from './store.js';
+import { useStore } from '../store/store.js';
 import { toast } from "react-hot-toast";
-import { useGetProfile } from "./useUser.js";
+import { useGetProfile } from "../hooks/useUser.js";
 
 
 const MONO = "'IBM Plex Mono', ui-monospace, monospace";

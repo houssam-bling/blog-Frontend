@@ -1,4 +1,4 @@
-import { useGetPostComments, useAddPostComments } from '../useComment';
+import { useGetPostComments, useAddPostComments } from '../hooks/useComment';
 import { useState } from "react";
 import { MONO, BODY, DUSTY, } from '../utils/tokens';
 import { toast } from "react-hot-toast";

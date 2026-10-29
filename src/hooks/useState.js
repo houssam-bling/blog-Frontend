@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { api } from "./axios";
+import { api } from "../services/axios";
 
 const getProfileStates = async ()=> (await api.get('/state/profile')).data;
 

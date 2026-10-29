@@ -1,5 +1,5 @@
 import { MONO, DISPLAY, SANS, AMBER, ROSE } from '../../utils/tokens';
-import { useGetAllUsers, useDeleteUser } from '../../useUser';
+import { useGetAllUsers, useDeleteUser } from '../../hooks/useUser';
 import { toast } from 'react-hot-toast';
 
 export default function AdminUsers() {
