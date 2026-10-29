@@ -2,28 +2,29 @@ import { useNavigate } from "react-router";
 import { useGetMyPosts } from './usePost'
 import { useStore } from './store';
 import { MONO, DISPLAY, SANS, CLAY, AMBER } from './tokens';
+import ErrorPage from './errorPage'
+import LoadingPage from './loadingPage'
+import { useMemo } from "react";
+import { useGetProfile } from "./useUser";
+import { useGetProfileStates } from "./useState";
 
 export default function ProfilePage() {
     const navigate = useNavigate();
-    const posts = useGetMyPosts();
+    const {data,isLoading,isError,error} = useGetProfile()
+    const {data:states} = useGetProfileStates()
 
-    const currentUser = useStore((state) => state.theUser) || {};
+    const user = data?.user || {};
     const setediteUserPopTrue = useStore((state) => state.setediteUserPopTrue);
 
-    const user = {
-        fullname: currentUser?.fullname || "اسم المستخدم",
-        email: currentUser?.email || "user@example.com",
-        gender: currentUser?.gender || "male",
-        role: currentUser?.role || "user",
-        createdAt: currentUser?.createdAt || new Date().toISOString(),
-    };
-
-    const initials = user.fullname.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
-    const joinDate = new Date(user.createdAt).toLocaleDateString("ar-EG", {
+    const initials = user?.fullname?.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() || '??';
+    const joinDate = new Date(user?.createdAt).toLocaleDateString("ar-EG", {
         year: "numeric", month: "long", day: "numeric",
     });
 
-    const isAdmin = user.role === "admin";
+    const isAdmin = user?.role === "admin";
+
+    if(isError) return <ErrorPage message={error.message}/>
+    if(isLoading) return <LoadingPage/>
 
     return (
         <div className="min-h-screen bg-[#fdfbf8] text-stone-800">
@@ -48,10 +49,10 @@ export default function ProfilePage() {
                         >{initials}</div>
                         <div className="flex-1 min-w-0">
                             <h1 className="text-[24px] leading-tight font-medium text-stone-900 mb-1 truncate" style={{ fontFamily: DISPLAY }}>
-                                {user.fullname}
+                                {user?.fullname}
                             </h1>
                             <p className="text-[12px] text-stone-500 truncate" style={{ fontFamily: MONO }} dir="ltr">
-                                {user.email}
+                                {user?.email}
                             </p>
                         </div>
                         <span
@@ -68,8 +69,8 @@ export default function ProfilePage() {
                     <div className="h-px mb-7" style={{ backgroundColor: '#e7e0d6' }} aria-hidden />
 
                     <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
-                        <InfoRow label="Email"  value={user.email} dir="ltr" />
-                        <InfoRow label="Gender" value={user.gender === "male" ? "ذكر" : "أنثى"} />
+                        <InfoRow label="Email"  value={user?.email} dir="ltr" />
+                        <InfoRow label="Gender" value={user?.gender === "male" ? "ذكر" : "أنثى"} />
                         <InfoRow label="Role"   value={isAdmin ? "مشرف" : "مستخدم"} />
                         <InfoRow label="Joined" value={joinDate} />
                     </dl>
@@ -91,7 +92,9 @@ export default function ProfilePage() {
 
                 {/* Stats */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6">
-                    <StatCard label="Posts" value={posts?.data?.length || 0} />
+                    <StatCard label="Posts" value={states?.postCount || 0} />
+                    <StatCard label="Likes" value={states?.likeCount || 0} />
+                    <StatCard label="Comments" value={states?.commentCount || 0} />
                 </div>
             </div>
         </div>

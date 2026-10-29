@@ -35,6 +35,6 @@ export function useSignIn()
 
 const Logout = async()=> (await api.post('/auth/LogOut')).data;
 
-export const useLogout = ()=> useMutation({mutationFn:Logout})
+export const useLogout = ()=> {const qc = useQueryClient();return useMutation({mutationFn:Logout,onSuccess:()=>qc.clear()})}
 
 

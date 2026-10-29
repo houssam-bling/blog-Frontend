@@ -6,6 +6,8 @@ import CommentItem from './comment';
 import { useGetPostComments, useAddPostComments } from './useComment'
 import { useLikePost, useDisLikesPost, useGetSinglePost } from './usePost'
 import { MONO, DISPLAY, BODY, SANS, CLAY, SAGE, ROSE, DUSTY, AMBER } from './tokens';
+import { useGetProfile } from "./useUser.js";
+
 import {toast} from 'react-hot-toast'
 export default function PostPage() {
     const { id } = useParams();
@@ -13,38 +15,35 @@ export default function PostPage() {
 
     const { data, isError, isLoading, error } = useGetSinglePost(id);
     const { data: commentsR } = useGetPostComments(id);
-    const { mutate: LikePost } = useLikePost();
-    const { mutate: Dislike } = useDisLikesPost();
+    const { mutate: LikePost,isPending:addingLike } = useLikePost();
+    const { mutate: Dislike,isPending:addingDislike } = useDisLikesPost();
+    const {data:theUser} = useGetProfile();
     const { mutate: AddComment } = useAddPostComments();
+
+    const currentUserId = theUser?.user?._id;
 
     const post = data?.post;
     const comments = commentsR?.Comment || [];
 
     const [comment, setComment] = useState("");
 
-    const publishDate = useMemo(() => {
-        if (!post?.createdAt) return "";
-        return new Date(post.createdAt).toLocaleDateString("ar-EG", {
+    const publishDate = new Date(post?.createdAt).toLocaleDateString("ar-EG", {
             year: "numeric", month: "long", day: "numeric",
             hour: "2-digit", minute: "2-digit",
         });
-    }, [post]);
 
-    const initials = useMemo(() => {
-        if (!post) return "";
-        return (post?.author?.fullname || "؟").split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
-    }, [post]);
+    const initials = (post?.author?.fullname || "؟").split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
 
-    const handleLike = () => LikePost({ id },  {onSuccess:()=>{
+    const handleLike = () => LikePost({ id,userId:currentUserId },  {onSuccess:()=>{
             toast.success('تم اضافة اعجاب بنجاح')
         }, onError: (e) =>toast.error(e.message)});
-    const handleDislike = () => Dislike({ id },  {onSuccess:()=>{
+    const handleDislike = () => Dislike({ id ,userId:currentUserId},  {onSuccess:()=>{
             toast.success('تم اضافة عدم اعجاب بنجاح')
         }, onError: (e) =>toast.error(e.message)});
     const handleAddComment = () => {
         if (!comment.trim()) return;
-        AddComment({ commentText: comment, postId: id }, { onError: (e) => console.log(e.message) });
-        setComment("");
+        AddComment({ commentText: comment, postId: id }, { onError: (e) => toast.error(e.message),onSuccess:()=>setComment("") });
+        
     };
 
     if (isLoading) return <LoadingPage />;
@@ -103,6 +102,7 @@ export default function PostPage() {
                     {/* Actions */}
                     <div className="flex items-center gap-1 mt-10 pt-6 border-t border-stone-200/80">
                         <button
+                            disabled={addingLike}
                             onClick={handleLike}
                             className="group flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] text-stone-500 hover:bg-[#f0f4ee] transition-colors"
                         >
@@ -112,6 +112,7 @@ export default function PostPage() {
                             </span>
                         </button>
                         <button
+                            disabled={addingDislike}
                             onClick={handleDislike}
                             className="group flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] text-stone-500 hover:bg-[#f8eff0] transition-colors"
                         >

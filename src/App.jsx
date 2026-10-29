@@ -9,7 +9,14 @@ import AddPop from './addPop'
 import EditUserPop from './editePop'
 import {useStore} from './store'
 import ProtectedRoute from './ProtectedRoute'
+import AdminProtectedRoute from './AdminProtectedRouter.jsx'
 import {Toaster} from 'react-hot-toast'
+import NotFound from './404'
+import Dashboard from "./AdminLayout"
+import PostDashboard from "./AdminPosts"
+import UsersDashboard from "./AdminUsers"
+import CommentsDashboard from "./AdminComments"
+import AdminDashboard from "./AdminOverview.jsx"
 function App() 
 {
     const addPop = useStore((set)=>set.addPop);
@@ -26,7 +33,13 @@ function App()
         <Route path="/post/:id" element= {<PostPage/>} />
         <Route path="/signIn" element= {<SigninPage/>} />
         <Route path="/signUp" element= {<SignupPage/>} />
-        <Route path="*" element= {<SignupPage/>} />
+        <Route path="/admin" element={<AdminProtectedRoute><Dashboard/></AdminProtectedRoute>}>
+          <Route index element={<AdminDashboard/>}/>
+          <Route path="posts" element={<PostDashboard/>}/>
+          <Route path="users" element={<UsersDashboard/>}/>
+          <Route path="comments" element={<CommentsDashboard/>}/>
+        </Route>
+        <Route path="*" element= {<NotFound/>} />
       </Routes>
     </div>
   )

@@ -20,18 +20,18 @@ export default function SignUpPage() {
     })
     const navigate = useNavigate();
     const { mutate, isPending } = useSignUp();
-    const setUser = useStore((set) => set.setUser);
+    const setIsLogin = useStore((set) => set.setIsLogin);
 
     const Sumbit = (input) => {
         mutate(input, {
             onSuccess: (data) => {
                 toast.success('تم التسجيل بنجاح')
-                setUser(data.User)
+                setIsLogin(true)
+                localStorage.setItem('isLogin',true)
                 localStorage.setItem('Token', data.token)
                 navigate("/")
             },
-            onError: (e) => { toast.error(e.message)
- }
+            onError: (e) => { toast.error(e.message);  setIsLogin(false)}
         })
     }
 

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useStore } from './store';
 import { useLogout } from "./useSign";
 import { toast } from "react-hot-toast";
+import { useGetProfile } from "./useUser";
 
 const MONO = "'IBM Plex Mono', ui-monospace, monospace";
 const DISPLAY = "'Newsreader', 'Amiri', 'Noto Naskh Arabic', Georgia, serif";
@@ -14,13 +15,16 @@ const ROSE = "#b5727a";
 
 export default function NavBar() {
     const navigate = useNavigate();
+    const {data} = useGetProfile();
     const setAddPopTrue = useStore((set) => set.setAddPopTrue);
     const setPopMode = useStore((set) => set.setPopMode);
-    const setthePostNull = useStore((set) => set.setthePostNull);
-    const user = useStore((set) => set.theUser);
+    const isLogin = useStore((set) => set.isLogin);
+    const setthePost = useStore((set) => set.setThePost);
     const logout = useStore((set) => set.logout);
+    const setIsLogin = useStore((set) => set.setIsLogin);
 
     const { mutate: logOut, isPending } = useLogout();
+    const isAdmin = data?.user?.role === "admin";
 
     const [isOpen, setIsOpen] = useState(false);
 
@@ -28,11 +32,12 @@ export default function NavBar() {
         logOut(null, {
             onSuccess: () => {
                 toast.success("تم تسجيل الخروج")
+                setIsLogin(false)
                 logout();
                 navigate('/');
                 setIsOpen(false);
             },
-            onError: (e) => { toast.error('حدث خطا') },
+            onError: () => { toast.error('حدث خطا') },
         });
     };
 
@@ -40,7 +45,7 @@ export default function NavBar() {
 
     const handleAddPost = () => {
         setPopMode("add");
-        setthePostNull();
+        setthePost(null);
         setAddPopTrue();
         setIsOpen(false);
     };
@@ -70,7 +75,7 @@ export default function NavBar() {
                             style={{ fontFamily: SANS }}
                         >الرئيسية</Link>
                     </li>
-                    {user && (
+                    {isLogin && (
                         <li>
                             <Link
                                 to="/profile"
@@ -79,10 +84,18 @@ export default function NavBar() {
                             >الملف الشخصي</Link>
                         </li>
                     )}
+                    {isAdmin && (<li>
+                            <Link
+                                to="/admin"
+                                className="px-3 py-1.5 rounded-md text-[13px] text-stone-600 hover:text-stone-900 hover:bg-stone-50 no-underline transition-colors"
+                                style={{ fontFamily: SANS }}
+                            > لوحة التحكم</Link>
+                    </li>)}
+                    
                 </ul>
 
                 {/* Actions (desktop) */}
-                {user && (
+                {isLogin && (
                     <div className="hidden md:flex items-center gap-2 shrink-0">
                         <button
                             onClick={handleAddPost}
@@ -101,10 +114,11 @@ export default function NavBar() {
                             <span className="text-[14px] leading-none">⏻</span>
                             {isPending ? '...' : 'تسجيل الخروج'}
                         </button>
+
                     </div>
                 )}
 
-                {!user && (
+                {!isLogin && (
                     <div className="hidden md:flex items-center gap-2 shrink-0">
                         <Link
                             to="/signIn"
@@ -135,11 +149,11 @@ export default function NavBar() {
             <div className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
                 <div className="px-6 py-4 border-t border-stone-100 bg-white flex flex-col gap-1">
                     <Link to="/" onClick={closeMenu} className="px-3 py-2.5 rounded-md text-[13px] text-stone-700 hover:bg-stone-50 no-underline transition-colors" style={{ fontFamily: SANS }}>الرئيسية</Link>
-                    {user && <Link to="/profile" onClick={closeMenu} className="px-3 py-2.5 rounded-md text-[13px] text-stone-700 hover:bg-stone-50 no-underline transition-colors" style={{ fontFamily: SANS }}>الملف الشخصي</Link>}
+                    {isLogin && <Link to="/profile" onClick={closeMenu} className="px-3 py-2.5 rounded-md text-[13px] text-stone-700 hover:bg-stone-50 no-underline transition-colors" style={{ fontFamily: SANS }}>الملف الشخصي</Link>}
 
                     <div className="h-px bg-stone-100 my-2" />
 
-                    {user && (
+                    {isLogin && (
                         <>
                             <button
                                 onClick={handleAddPost}
@@ -161,7 +175,7 @@ export default function NavBar() {
                         </>
                     )}
 
-                    {!user && (
+                    {!isLogin && (
                         <>
                             <Link to="/signIn" onClick={closeMenu} className="px-3 py-2.5 rounded-md text-[13px] text-stone-700 hover:bg-stone-50 no-underline text-center transition-colors" style={{ fontFamily: MONO }}>Sign In</Link>
                             <Link to="/signUp" onClick={closeMenu} className="px-3 py-2.5 rounded-md text-[13px] font-medium bg-stone-800 text-white hover:bg-stone-900 no-underline text-center transition-colors" style={{ fontFamily: MONO }}>Sign Up</Link>

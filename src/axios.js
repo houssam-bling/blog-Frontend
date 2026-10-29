@@ -1,7 +1,8 @@
 import axios from 'axios'
 import {useStore} from './store'
+import {toast} from 'react-hot-toast'
 export const api = axios.create({
-    baseURL:'http://localhost:3000/',
+    baseURL:'http://localhost:3000',
     withCredentials:true,
 })
 
@@ -12,83 +13,44 @@ api.interceptors.request.use((config) => {
     }
     return config;
 })
-
-
-let isRefreshing = false;
-let failedQueue = [];
-
-
-const processQueue = (error,token = null)=>
-{
-    failedQueue.forEach((prom)=>{
-        if(error) 
-        {
-            prom.reject(error)
-        }
-        else
-        {
-            prom.resolve(token)
-        }
-    });
-
-    failedQueue = [];
-}
-
+let refreshPromise = null;
 api.interceptors.response.use(
     (response) => response,
    async (error) => {
+
         if (error.response?.status === 401) {
+
             const originalRequest = error.config;
-
-            if(isRefreshing)
+            if (!originalRequest._retry)
             {
-                return new Promise((resolve,reject)=>{
-                    failedQueue.push({resolve,reject})
-                }).then(token => {
-                    originalRequest.headers.Authorization = `Bearer ${token}`;
-                    return api.request(originalRequest);
-                })
-                .catch(err => Promise.reject(err));
-
-                
-            }
-            if(!originalRequest?.retry)
-            {
-                originalRequest.retry = true;
-                isRefreshing = true;
-
+                originalRequest._retry = true;
+                if(!refreshPromise)
+                {
+                    refreshPromise = axios.get(`${api.defaults.baseURL}/auth/refresh`,{
+                        withCredentials:true,
+                    }).finally(()=>{
+                        refreshPromise = null;
+                    });
+                }
                 try
                 {
-                    const response = await axios.get(`${api.defaults.baseURL}/auth/refresh`,{
-                        withCredentials:true,
-                    });
-                    const newToken = response.data.Token;
-                    processQueue(null, newToken);
+                    const response = await refreshPromise;
+                    const newToken = response.data.token;
                     localStorage.setItem('Token',newToken);
                     originalRequest.headers.Authorization = `Bearer ${newToken}`
                     return api.request(originalRequest)
                 }
                 catch(refreshError)
                 {
-                    processQueue(refreshError, null); 
-
                     localStorage.removeItem('Token');
                     useStore.getState().logout();
-                    window.location.href = '/signIn';
                     return Promise.reject(refreshError);
-
-                }
-                finally
-                {
-                    isRefreshing = false;
                 }
             }
-            originalRequest.retry = false;
-            return Promise.reject(error);
         }
         if(error.response?.status === 429)
         {
-            alert('too many requests');
+            toast.error('طلبات كثيرة جداً، جرب من بعد شوية');
             return Promise.reject(error);
         }
         return Promise.reject(error);

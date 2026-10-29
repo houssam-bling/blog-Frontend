@@ -1,16 +1,31 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useStore } from './store';
 import { useEditeUser } from './useUser';
 import { MONO, DISPLAY, SANS, CLAY, AMBER, fieldClass } from './tokens';
 import { toast } from "react-hot-toast";
+import { useGetProfile } from "./useUser.js";
+import LoadingPage from './loadingPage.jsx'
+ 
 
 export default function EditUserPop() {
-    const theUser = useStore((state) => state.theUser);
+
+    const {data,isLoading} = useGetProfile();
+
+    const theUser = data?.user;
+
     const setediteUserPopFalse = useStore((state) => state.setediteUserPopFalse);
 
-    const [fullname, setFullname] = useState(theUser?.fullname || "");
-    const [email, setEmail] = useState(theUser?.email || "");
-    const [gender, setGender] = useState(theUser?.gender || "male");
+    const [fullname, setFullname] = useState( "");
+    const [email, setEmail] = useState("");
+    const [gender, setGender] = useState("male");
+
+
+    useEffect(()=>{
+        setFullname(theUser?.fullname)
+        setEmail(theUser?.email)
+        setGender(theUser?.gender)
+    },[theUser])
+
 
     const { mutate: updateProfile, isPending } = useEditeUser();
 
@@ -31,6 +46,8 @@ export default function EditUserPop() {
             }
         );
     };
+
+    if(isLoading) return <LoadingPage/>
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/30 backdrop-blur-sm p-4">

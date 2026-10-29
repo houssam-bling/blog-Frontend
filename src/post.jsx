@@ -1,9 +1,11 @@
 import { Link } from "react-router";
 import { useState } from "react";
 import { useDeletePost, useDisLikesPost, useLikePost } from './usePost';
-import { useGetPostComments, useAddPostComments } from './useComment';
+import CommentBox from './CommentBox.jsx'
 import { useStore } from './store.js';
 import { toast } from "react-hot-toast";
+import { useGetProfile } from "./useUser.js";
+
 
 const MONO = "'IBM Plex Mono', ui-monospace, monospace";
 const SERIF = "'Newsreader', 'Instrument Serif', Georgia, serif";
@@ -20,42 +22,33 @@ export default function Post({ post }) {
     const { _id, postTitle, postBody, likes = [], dislikes = [], author, createdAt } = post || {};
 
     const [showComment, setShowComment] = useState(false);
-    const [comment, setComment] = useState("");
-    const [showMenu, setShowMenu] = useState(false);
-
-    const theUser = useStore((state) => state.theUser) || {};
+    const [showMenu, setShowMenu] = useState(false);    
+    const {data:theUser} = useGetProfile();
     const authorId = typeof author === 'object' ? author?._id : author;
-    const currentUserId = theUser?._id;
+    const currentUserId = theUser?.user?._id;
     const isMyPost = authorId && currentUserId && authorId === currentUserId;
 
-    const { mutate: LikePost } = useLikePost();
-    const { mutate: Dislike } = useDisLikesPost();
+    const { mutate: LikePost,isPending:LikePending } = useLikePost();
+    const { mutate: Dislike,isPending:DisLikePending } = useDisLikesPost();
     const { mutate: deletePost } = useDeletePost();
-    const { data: commentsR } = useGetPostComments(_id);
 
     const setAddPopTrue = useStore((s) => s.setAddPopTrue);
     const setPopMode = useStore((s) => s.setPopMode);
     const setThePost = useStore((s) => s.setThePost);
 
-    const { mutate: AddComment } = useAddPostComments();
-    const comments = commentsR?.Comment || [];
+    const publishDate = new Date(createdAt).toLocaleDateString("ar-EG", {
+            year: "numeric", month: "long", day: "numeric",
+            hour: "2-digit", minute: "2-digit",
+    });
 
-    const handleLike = () => LikePost({ id: _id }, {onSuccess:()=>{
+
+    const handleLike = () => LikePost({ id: _id,userId:currentUserId }, {onSuccess:()=>{
             toast.success('تم اضافة اعجاب بنجاح')
         }, onError: (e) =>toast.error(e.message)})
-    const handleDislike = () => Dislike({ id: _id }, {onSuccess:()=>{
+    const handleDislike = () => Dislike({ id: _id,userId:currentUserId  }, {onSuccess:()=>{
             toast.success('تم اضافة عدم اعجاب بنجاح')
         }, onError: (e) =>toast.error(e.message)});
 
-    const handleAddComment = () => {
-        if (!comment.trim()) return;
-        AddComment({ commentText: comment, postId: _id }, {onSuccess:()=>{
-            toast.success('تم اضافة تعليق بنجاح')
-        }, onError: (e) =>toast.error(e.message)
-
- });
-        setComment("");
-    };
 
     const handleDeletPost = () => {
         if (!window.confirm("are you sure ?")) return;
@@ -87,7 +80,7 @@ export default function Post({ post }) {
                         {author?.fullname || "Anonymous"}
                     </p>
                     <p className="text-[11px]" style={{ fontFamily: MONO, color: AMBER }}>
-                        {createdAt}
+                        {publishDate}
                     </p>
                 </div>
 
@@ -154,7 +147,7 @@ export default function Post({ post }) {
 
             {/* ── Actions ───────────────────────────── */}
             <div className="flex items-center gap-1 px-3 pb-2">
-                <button
+                <button disabled={LikePending}
                     onClick={handleLike}
                     className="group flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[13px] text-stone-500 transition-colors hover:bg-[#f0f4ee]"
                 >
@@ -166,6 +159,7 @@ export default function Post({ post }) {
 
                 <button
                     onClick={handleDislike}
+                    disabled={DisLikePending}
                     className="group flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[13px] text-stone-500 transition-colors hover:bg-[#f8eff0]"
                 >
                     <span className="text-[12px] transition-colors group-hover:text-(--rose)" style={{ '--rose': ROSE }}>↓</span>
@@ -185,64 +179,12 @@ export default function Post({ post }) {
                 >
                     <span className="text-[12px]" style={showComment ? { color: DUSTY } : undefined}>❞</span>
                     <span className="tabular-nums" style={{ fontFamily: MONO, color: showComment ? DUSTY : undefined }}>
-                        {comments.length}
                     </span>
                 </button>
             </div>
 
             {/* ── Comments ──────────────────────────── */}
-            {showComment && (
-                <section
-                    className="px-6 py-4 space-y-3 border-t"
-                    style={{ backgroundColor: "#f7f8fa", borderColor: "#e6e9ee" }}
-                >
-                    <div className="flex items-center gap-2">
-                        <input
-                            type="text"
-                            value={comment}
-                            onChange={(e) => setComment(e.target.value)}
-                            onKeyDown={(e) => e.key === "Enter" && handleAddComment()}
-                            placeholder="Write a reply…"
-                            className="flex-1 bg-white border border-stone-200 rounded-lg px-3.5 py-2 text-[14px] text-stone-800 placeholder:text-stone-400 focus:outline-none focus:border-stone-400 transition-colors"
-                            style={{ fontFamily: BODY }}
-                        />
-                        <button
-                            onClick={handleAddComment}
-                            className="px-4 py-2 rounded-lg text-white text-[12px] font-medium transition-opacity hover:opacity-90"
-                            style={{ fontFamily: MONO, backgroundColor: DUSTY }}
-                        >
-                            Send
-                        </button>
-                    </div>
-
-                    {comments?.length > 0 ? (
-                        <ol className="max-h-56 overflow-y-auto -mx-1">
-                            {comments.map((c, i) => (
-                                <li
-                                    key={c?._id}
-                                    className="flex gap-3 px-1 py-2 text-[14px] text-stone-600"
-                                    style={{ fontFamily: BODY }}
-                                >
-                                    <span
-                                        className="text-[10px] pt-1 shrink-0 tabular-nums"
-                                        style={{ fontFamily: MONO, color: DUSTY }}
-                                    >
-                                        {String(i + 1).padStart(2, "0")}
-                                    </span>
-                                    <span className="leading-snug">{c?.commentText}</span>
-                                </li>
-                            ))}
-                        </ol>
-                    ) : (
-                        <p
-                            className="text-center text-[11px] py-1"
-                            style={{ fontFamily: MONO, color: DUSTY, opacity: 0.65 }}
-                        >
-                            No replies yet — be the first
-                        </p>
-                    )}
-                </section>
-            )}
+            {showComment && <CommentBox _id={_id}/>}
 
             {/* ── Read more ─────────────────────────── */}
             <div className="flex justify-end px-6 py-3 border-t border-stone-100">

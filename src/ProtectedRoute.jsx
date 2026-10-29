@@ -5,9 +5,9 @@ import ErrorMessage from './errorPage';
 
 export default function ProtectedRoute({children})
 {
-    const user = useStore((set)=>set.theUser);
+    const isLogin = useStore((set)=>set.isLogin);
 
-    if(!user) return <ErrorMessage message={"يرجى تسجيل الدخول"}/>
+    if(!isLogin) return <ErrorMessage message={"يرجى تسجيل الدخول"}/>
     
     else
     {

@@ -17,18 +17,19 @@ const fieldClass = "w-full bg-white border border-stone-200 rounded-lg px-3.5 py
 export default function SignPage() {
     const { register, handleSubmit } = useForm({ defaultValues: { email: '', password: '', } })
     const { mutate, isPending } = useSignIn()
-    const setUser = useStore((set) => set.setUser);
+    const setIsLogin = useStore((set) => set.setIsLogin);
 
     const navigate = useNavigate();
     const onSubmit = (input) => {
         mutate(input, {
             onSuccess: (data) => {
                 toast.success('تم الدخول بنجاح')
-                setUser(data.User)
+                localStorage.setItem('isLogin',true)
+                setIsLogin(true)
                 localStorage.setItem("Token", data.token)
                 navigate("/")
             },
-            onError: (e) => { toast.error(e.message) },
+            onError: (e) => { toast.error(e.message),setIsLogin(false) },
         })
     }
 
