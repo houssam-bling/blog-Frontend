@@ -2,7 +2,7 @@ import axios from 'axios'
 import {useStore} from './store'
 import {toast} from 'react-hot-toast'
 export const api = axios.create({
-    baseURL:'http://localhost:3000',
+    baseURL:'blog-backend-production-3557.up.railway.app',
     withCredentials:true,
 })
 
