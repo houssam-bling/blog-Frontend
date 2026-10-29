@@ -1,6 +1,6 @@
 import {useMutation,useQuery,useQueryClient} from '@tanstack/react-query';
-import {api} from './axios'
-import {useStore} from './store'
+import {api} from '../services/axios'
+import {useStore} from '../store/store'
 
 const editeUser = async (inputForm)=> (await api.patch('/users/update',{...inputForm})).data;
 

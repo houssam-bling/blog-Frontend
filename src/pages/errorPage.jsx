@@ -1,4 +1,4 @@
-import { MONO, DISPLAY, SANS, ROSE, AMBER } from './tokens';
+import { MONO, DISPLAY, SANS, ROSE, AMBER } from '../utils/tokens';
 
 export default function ErrorMessage({ message = "حدث خطأ غير متوقع أثناء جلب البيانات." }) {
     return (

@@ -1,9 +1,9 @@
 import { Link, useNavigate } from "react-router";
 import { useState } from "react";
-import { useStore } from './store';
-import { useLogout } from "./useSign";
+import { useStore } from '../store/store';
+import { useLogout } from "../hooks/useSign";
 import { toast } from "react-hot-toast";
-import { useGetProfile } from "./useUser";
+import { useGetProfile } from "../hooks/useUser";
 
 const MONO = "'IBM Plex Mono', ui-monospace, monospace";
 const DISPLAY = "'Newsreader', 'Amiri', 'Noto Naskh Arabic', Georgia, serif";

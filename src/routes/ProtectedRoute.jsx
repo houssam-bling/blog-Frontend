@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router';
-import  {useStore} from './store'
-import ErrorMessage from './errorPage';
+import  {useStore} from '../store/store'
+import ErrorMessage from '../errorPage';
 
 
 export default function ProtectedRoute({children})

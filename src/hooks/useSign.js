@@ -1,5 +1,5 @@
 import {useMutation,useQueryClient} from '@tanstack/react-query'
-import  {api} from './axios';
+import  {api} from '../services/axios';
 
 const signUp = async function (inputForm)
 {

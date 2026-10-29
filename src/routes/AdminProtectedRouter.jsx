@@ -1,6 +1,6 @@
-import ErrorMessage from './errorPage';
-import { useGetProfile } from './useUser';
-import LoadingPage from './loadingPage'
+import ErrorMessage from '../errorPage';
+import { useGetProfile } from '../useUser';
+import LoadingPage from '../loadingPage'
 
 export default function ProtectedRoute({children})
 {

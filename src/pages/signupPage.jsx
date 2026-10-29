@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
-import { useSignUp } from './useSign'
-import { useStore } from './store'
+import { useSignUp } from '../useSign'
+import { useStore } from '../store/store'
 import { toast } from "react-hot-toast";
 
 

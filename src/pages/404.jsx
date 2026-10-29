@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router";
-import { MONO, DISPLAY, BODY, SANS, CLAY, AMBER, DUSTY } from './tokens';
+import { MONO, DISPLAY, BODY, SANS, CLAY, AMBER, DUSTY } from '../utils/tokens';
 
 export default function NotFoundPage() {
     const navigate = useNavigate();

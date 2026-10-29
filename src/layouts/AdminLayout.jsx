@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from "react-router";
-import { MONO, DISPLAY, CLAY, ROSE } from './tokens';
+import { MONO, DISPLAY, CLAY, ROSE } from '../utils/tokens';
 
 export default function AdminLayout() {
     const navigate = useNavigate();

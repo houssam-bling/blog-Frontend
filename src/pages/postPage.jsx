@@ -1,14 +1,15 @@
 import { useParams, useNavigate } from "react-router";
-import { useState, useMemo } from "react";
-import LoadingPage from "./loadingPage";
-import ErrorPage from "./errorPage";
-import CommentItem from './comment';
-import { useGetPostComments, useAddPostComments } from './useComment'
-import { useLikePost, useDisLikesPost, useGetSinglePost } from './usePost'
-import { MONO, DISPLAY, BODY, SANS, CLAY, SAGE, ROSE, DUSTY, AMBER } from './tokens';
-import { useGetProfile } from "./useUser.js";
-
+import { useState } from "react";
+import LoadingPage from "./loadingPage.jsx.jsx";
+import ErrorPage from "./errorPage.jsx.jsx";
+import CommentItem from '../components/comment.jsx';
+import { useGetPostComments, useAddPostComments } from '../useComment'
+import { useLikePost, useDisLikesPost, useGetSinglePost } from '../usePost'
+import { MONO, DISPLAY, BODY, SANS, CLAY, SAGE, ROSE, DUSTY, AMBER } from '../utils/tokens.js';
+import { useGetProfile } from "../useUser.js";
 import {toast} from 'react-hot-toast'
+
+
 export default function PostPage() {
     const { id } = useParams();
     const navigate = useNavigate();

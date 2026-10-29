@@ -1,4 +1,4 @@
-import { MONO } from './tokens';
+import { MONO } from '../utils/tokens';
 
 export default function Loading() {
     return (

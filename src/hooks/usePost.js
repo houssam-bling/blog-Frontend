@@ -1,5 +1,5 @@
 import {useQuery,useMutation,useQueryClient,keepPreviousData} from '@tanstack/react-query'
-import {api} from './axios';
+import {api} from '../services/axios';
 
 const handleLogic = ({postId,userId,posts,action})=>
 {

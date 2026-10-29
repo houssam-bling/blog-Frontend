@@ -1,8 +1,8 @@
 import axios from 'axios'
-import {useStore} from './store'
+import {useStore} from '../store/store'
 import {toast} from 'react-hot-toast'
 export const api = axios.create({
-    baseURL:'blog-backend-production-3557.up.railway.app',
+    baseURL:'https://blog-backend-production-3557.up.railway.app',
     withCredentials:true,
 })
 
@@ -53,6 +53,8 @@ api.interceptors.response.use(
             toast.error('طلبات كثيرة جداً، جرب من بعد شوية');
             return Promise.reject(error);
         }
+        error.userMessage = error.response?.data?.message || error.message;
+        error.message = error.userMessage;
         return Promise.reject(error);
     }
 );

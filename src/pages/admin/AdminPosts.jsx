@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { MONO, DISPLAY, SANS, ROSE } from './tokens';
-import { useGetAllPosts, useDeletePost } from './usePost';
-import { useStore } from './store';
+import { MONO, DISPLAY, SANS, ROSE } from '../../utils/tokens';
+import { useGetAllPosts, useDeletePost } from '../../usePost';
+import { useStore } from '../../store/store';
 import { toast } from 'react-hot-toast';
 
 export default function AdminPosts() {

@@ -1,12 +1,12 @@
 import { useNavigate } from "react-router";
-import { useGetMyPosts } from './usePost'
-import { useStore } from './store';
-import { MONO, DISPLAY, SANS, CLAY, AMBER } from './tokens';
-import ErrorPage from './errorPage'
-import LoadingPage from './loadingPage'
+import { useGetMyPosts } from '../usePost'
+import { useStore } from '../store/store';
+import { MONO, DISPLAY, SANS, CLAY, AMBER } from '../utils/tokens';
+import ErrorPage from '../errorPage'
+import LoadingPage from '../loadingPage'
 import { useMemo } from "react";
-import { useGetProfile } from "./useUser";
-import { useGetProfileStates } from "./useState";
+import { useGetProfile } from "../useUser";
+import { useGetProfileStates } from "../useState";
 
 export default function ProfilePage() {
     const navigate = useNavigate();

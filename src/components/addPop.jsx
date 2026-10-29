@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useStore } from './store'
-import { useAddPost, useEditPost } from './usePost'
-import { MONO, DISPLAY, SANS, CLAY, AMBER, fieldClass } from './tokens';
+import { useStore } from '../store/store'
+import { useAddPost, useEditPost } from '../usePost'
+import { MONO, DISPLAY, SANS, CLAY, AMBER, fieldClass } from '../utils/tokens';
 import { toast } from "react-hot-toast";
 
 
