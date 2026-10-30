@@ -2,14 +2,18 @@ import ErrorMessage from '../pages/errorPage';
 import { useGetProfile } from '../hooks/useUser';
 import LoadingPage from '../pages/loadingPage'
 
-export default function ProtectedRoute({children})
+export default function AdminProtectedRouter({ children })
 {
-    const {data,isLoading,isError} = useGetProfile();
+    const {
+        data: profile,
+        isLoading: isProfileLoading,
+        isError: isProfileError
+    } = useGetProfile();
 
-    if(isLoading) return <LoadingPage/>
-    if(isError) return <ErrorMessage/>
+    if(isProfileLoading) return <LoadingPage/>
+    if(isProfileError) return <ErrorMessage/>
 
-    if(!data || data?.user.role !== "admin") return  <ErrorMessage message={"غير مصرح"}/>
+    if(!profile || profile.user?.role !== "admin") return <ErrorMessage message={"غير مصرح"}/>
     else
     {
         return(

@@ -4,46 +4,49 @@ import LoadingPage from "./loadingPage.jsx";
 import ErrorPage from "./errorPage.jsx";
 import CommentItem from '../components/comment.jsx';
 import { useGetPostComments, useAddPostComments } from '../hooks/useComment'
-import { useLikePost, useDisLikesPost, useGetSinglePost } from '../hooks/usePost'
+import { useLikePost, useDislikePost, useGetSinglePost } from '../hooks/usePost'
 import { MONO, DISPLAY, BODY, SANS, CLAY, SAGE, ROSE, DUSTY, AMBER } from '../utils/tokens.js';
 import { useGetProfile } from "../hooks/useUser.js";
 import {toast} from 'react-hot-toast'
 
 
 export default function PostPage() {
-    const { id } = useParams();
+    const { id: postId } = useParams();
     const navigate = useNavigate();
 
-    const { data, isError, isLoading, error } = useGetSinglePost(id);
-    const { data: commentsR } = useGetPostComments(id);
-    const { mutate: LikePost,isPending:addingLike } = useLikePost();
-    const { mutate: Dislike,isPending:addingDislike } = useDisLikesPost();
-    const {data:theUser} = useGetProfile();
-    const { mutate: AddComment } = useAddPostComments();
+    const { data: postResponse, isError, isLoading, error } = useGetSinglePost(postId);
+    const { data: commentsResponse } = useGetPostComments(postId);
+    const { mutate: likePost, isPending: isAddingLike } = useLikePost();
+    const { mutate: dislikePost, isPending: isAddingDislike } = useDislikePost();
+    const { data: profileData } = useGetProfile();
+    const { mutate: addComment } = useAddPostComments();
 
-    const currentUserId = theUser?.user?._id;
+    const currentUserId = profileData?.user?._id;
 
-    const post = data?.post;
-    const comments = commentsR?.Comment || [];
+    const post = postResponse?.post;
+    const comments = commentsResponse?.Comment || [];
 
-    const [comment, setComment] = useState("");
+    const [commentText, setCommentText] = useState("");
 
     const publishDate = new Date(post?.createdAt).toLocaleDateString("ar-EG", {
             year: "numeric", month: "long", day: "numeric",
             hour: "2-digit", minute: "2-digit",
         });
 
-    const initials = (post?.author?.fullname || "؟").split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
+    const initials = (post?.author?.fullname || "؟").split(" ").map((namePart) => namePart[0]).slice(0, 2).join("").toUpperCase();
 
-    const handleLike = () => LikePost({ id,userId:currentUserId },  {onSuccess:()=>{
+    const handleLike = () => likePost({ id: postId, userId: currentUserId }, { onSuccess: () => {
             toast.success('تم اضافة اعجاب بنجاح')
-        }, onError: (e) =>toast.error(e.message)});
-    const handleDislike = () => Dislike({ id ,userId:currentUserId},  {onSuccess:()=>{
+        }, onError: (error) => toast.error(error.message) });
+    const handleDislike = () => dislikePost({ id: postId, userId: currentUserId }, { onSuccess: () => {
             toast.success('تم اضافة عدم اعجاب بنجاح')
-        }, onError: (e) =>toast.error(e.message)});
+        }, onError: (error) => toast.error(error.message) });
     const handleAddComment = () => {
-        if (!comment.trim()) return;
-        AddComment({ commentText: comment, postId: id }, { onError: (e) => toast.error(e.message),onSuccess:()=>setComment("") });
+        if (!commentText.trim()) return;
+        addComment({ commentText, postId }, {
+            onError: (error) => toast.error(error.message),
+            onSuccess: () => setCommentText("")
+        });
         
     };
 
@@ -103,7 +106,7 @@ export default function PostPage() {
                     {/* Actions */}
                     <div className="flex items-center gap-1 mt-10 pt-6 border-t border-stone-200/80">
                         <button
-                            disabled={addingLike}
+                            disabled={isAddingLike}
                             onClick={handleLike}
                             className="group flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] text-stone-500 hover:bg-[#f0f4ee] transition-colors"
                         >
@@ -113,7 +116,7 @@ export default function PostPage() {
                             </span>
                         </button>
                         <button
-                            disabled={addingDislike}
+                            disabled={isAddingDislike}
                             onClick={handleDislike}
                             className="group flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] text-stone-500 hover:bg-[#f8eff0] transition-colors"
                         >
@@ -142,16 +145,16 @@ export default function PostPage() {
                     {/* Composer */}
                     <div className="flex items-stretch border border-stone-200 rounded-xl overflow-hidden bg-white mb-6 focus-within:border-stone-800 transition-colors">
                         <input
-                            value={comment}
-                            onChange={(e) => setComment(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
+                            value={commentText}
+                            onChange={(event) => setCommentText(event.target.value)}
+                            onKeyDown={(event) => event.key === 'Enter' && handleAddComment()}
                             placeholder="Write a reply…"
                             className="flex-1 px-4 py-3 text-[14px] text-stone-800 placeholder:text-stone-400 bg-transparent focus:outline-none min-w-0"
                             style={{ fontFamily: BODY }}
                         />
                         <button
                             onClick={handleAddComment}
-                            disabled={!comment.trim()}
+                            disabled={!commentText.trim()}
                             className="px-5 border-l border-stone-200 text-[11px] uppercase tracking-[0.22em] font-bold hover:bg-stone-800 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-stone-800 transition-colors"
                             style={{ fontFamily: MONO }}
                         >Send</button>
@@ -164,8 +167,8 @@ export default function PostPage() {
                         </p>
                     ) : (
                         <ol className="divide-y divide-stone-100">
-                            {comments.map((c) => (
-                                <CommentItem key={c._id} comment={c} />
+                            {comments.map((commentItem) => (
+                                <CommentItem key={commentItem._id} comment={commentItem} />
                             ))}
                         </ol>
                     )}

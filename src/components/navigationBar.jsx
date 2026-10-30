@@ -15,25 +15,25 @@ const ROSE = "#b5727a";
 
 export default function NavBar() {
     const navigate = useNavigate();
-    const {data} = useGetProfile();
-    const setAddPopTrue = useStore((set) => set.setAddPopTrue);
-    const setPopMode = useStore((set) => set.setPopMode);
-    const isLogin = useStore((set) => set.isLogin);
-    const setthePost = useStore((set) => set.setThePost);
-    const logout = useStore((set) => set.logout);
-    const setIsLogin = useStore((set) => set.setIsLogin);
+    const { data: profileData } = useGetProfile();
+    const openPostModal = useStore((state) => state.openPostModal);
+    const setPostModalMode = useStore((state) => state.setPostModalMode);
+    const isLoggedIn = useStore((state) => state.isLoggedIn);
+    const clearSelectedPost = useStore((state) => state.clearSelectedPost);
+    const clearStoredAuth = useStore((state) => state.clearStoredAuth);
+    const setIsLoggedIn = useStore((state) => state.setIsLoggedIn);
 
-    const { mutate: logOut, isPending } = useLogout();
-    const isAdmin = data?.user?.role === "admin";
+    const { mutate: logoutMutation, isPending: isLoggingOut } = useLogout();
+    const isAdmin = profileData?.user?.role === "admin";
 
     const [isOpen, setIsOpen] = useState(false);
 
     const handleClick = () => {
-        logOut(null, {
+        logoutMutation(null, {
             onSuccess: () => {
                 toast.success("تم تسجيل الخروج")
-                setIsLogin(false)
-                logout();
+                setIsLoggedIn(false)
+                clearStoredAuth();
                 navigate('/');
                 setIsOpen(false);
             },
@@ -44,9 +44,9 @@ export default function NavBar() {
     const closeMenu = () => setIsOpen(false);
 
     const handleAddPost = () => {
-        setPopMode("add");
-        setthePost(null);
-        setAddPopTrue();
+        setPostModalMode("add");
+        clearSelectedPost();
+        openPostModal();
         setIsOpen(false);
     };
 
@@ -75,7 +75,7 @@ export default function NavBar() {
                             style={{ fontFamily: SANS }}
                         >الرئيسية</Link>
                     </li>
-                    {isLogin && (
+                    {isLoggedIn && (
                         <li>
                             <Link
                                 to="/profile"
@@ -95,7 +95,7 @@ export default function NavBar() {
                 </ul>
 
                 {/* Actions (desktop) */}
-                {isLogin && (
+                {isLoggedIn && (
                     <div className="hidden md:flex items-center gap-2 shrink-0">
                         <button
                             onClick={handleAddPost}
@@ -107,18 +107,18 @@ export default function NavBar() {
                         </button>
                         <button
                             onClick={handleClick}
-                            disabled={isPending}
+                            disabled={isLoggingOut}
                             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-[12px] font-medium border border-transparent hover:bg-[#fbf1ee] transition-colors disabled:opacity-60"
                             style={{ fontFamily: SANS, color: ROSE }}
                         >
                             <span className="text-[14px] leading-none">⏻</span>
-                            {isPending ? '...' : 'تسجيل الخروج'}
+                            {isLoggingOut ? '...' : 'تسجيل الخروج'}
                         </button>
 
                     </div>
                 )}
 
-                {!isLogin && (
+                {!isLoggedIn && (
                     <div className="hidden md:flex items-center gap-2 shrink-0">
                         <Link
                             to="/signIn"
@@ -149,11 +149,11 @@ export default function NavBar() {
             <div className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
                 <div className="px-6 py-4 border-t border-stone-100 bg-white flex flex-col gap-1">
                     <Link to="/" onClick={closeMenu} className="px-3 py-2.5 rounded-md text-[13px] text-stone-700 hover:bg-stone-50 no-underline transition-colors" style={{ fontFamily: SANS }}>الرئيسية</Link>
-                    {isLogin && <Link to="/profile" onClick={closeMenu} className="px-3 py-2.5 rounded-md text-[13px] text-stone-700 hover:bg-stone-50 no-underline transition-colors" style={{ fontFamily: SANS }}>الملف الشخصي</Link>}
+                    {isLoggedIn && <Link to="/profile" onClick={closeMenu} className="px-3 py-2.5 rounded-md text-[13px] text-stone-700 hover:bg-stone-50 no-underline transition-colors" style={{ fontFamily: SANS }}>الملف الشخصي</Link>}
 
                     <div className="h-px bg-stone-100 my-2" />
 
-                    {isLogin && (
+                    {isLoggedIn && (
                         <>
                             <button
                                 onClick={handleAddPost}
@@ -165,17 +165,17 @@ export default function NavBar() {
                             </button>
                             <button
                                 onClick={handleClick}
-                                disabled={isPending}
+                                disabled={isLoggingOut}
                                 className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md text-[13px] font-medium hover:bg-[#fbf1ee] transition-colors disabled:opacity-60"
                                 style={{ fontFamily: SANS, color: ROSE }}
                             >
                                 <span className="text-[14px] leading-none">⏻</span>
-                                {isPending ? '...' : 'تسجيل الخروج'}
+                                {isLoggingOut ? '...' : 'تسجيل الخروج'}
                             </button>
                         </>
                     )}
 
-                    {!isLogin && (
+                    {!isLoggedIn && (
                         <>
                             <Link to="/signIn" onClick={closeMenu} className="px-3 py-2.5 rounded-md text-[13px] text-stone-700 hover:bg-stone-50 no-underline text-center transition-colors" style={{ fontFamily: MONO }}>Sign In</Link>
                             <Link to="/signUp" onClick={closeMenu} className="px-3 py-2.5 rounded-md text-[13px] font-medium bg-stone-800 text-white hover:bg-stone-900 no-underline text-center transition-colors" style={{ fontFamily: MONO }}>Sign Up</Link>

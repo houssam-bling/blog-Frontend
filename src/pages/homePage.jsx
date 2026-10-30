@@ -12,8 +12,8 @@ const AMBER = "#c99a4a";
 
 export default function HomePage() {
 
-    const [page,setPage] = useState(1)
-    const { data, isLoading, isError, error } = useGetAllPosts({page:page,limit:5})
+    const [page, setPage] = useState(1)
+    const { data: postsData, isLoading, isError, error } = useGetAllPosts({ page, limit: 5 })
     useEffect(() => {
         window.scrollTo({
             top: 0,
@@ -23,9 +23,9 @@ export default function HomePage() {
     if (isLoading) { return <LoadingPage /> }
     if (isError) { return <ErrorPage message={error.message} /> }
 
-    const posts = data.Posts || [];
+    const posts = postsData.Posts || [];
     const isEmpty = posts.length === 0;
-    const totalPages = data.TotalPages;
+    const totalPages = postsData.TotalPages;
 
     
     return (
@@ -93,7 +93,7 @@ export default function HomePage() {
                     <div className="flex justify-center items-center gap-4 mt-12 pt-6 border-t border-stone-100">
                         <button 
                             disabled={page === 1} 
-                            onClick={() => setPage(p => p - 1)}
+                            onClick={() => setPage(currentPage => currentPage - 1)}
                             className="px-4 py-2 border border-stone-200 rounded-lg text-[13px] disabled:opacity-50 hover:bg-stone-50 transition-colors"
                         >
                             السابق
@@ -103,7 +103,7 @@ export default function HomePage() {
                         </span>
                         <button 
                             disabled={page === totalPages} 
-                            onClick={() => setPage(p => p + 1)}
+                            onClick={() => setPage(currentPage => currentPage + 1)}
                             className="px-4 py-2 border border-stone-200 rounded-lg text-[13px] disabled:opacity-50 hover:bg-stone-50 transition-colors"
                         >
                             التالي

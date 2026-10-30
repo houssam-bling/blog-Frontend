@@ -6,40 +6,40 @@ import { toast } from "react-hot-toast";
 
 
 export default function AddPostModal() {
-    const popMode = useStore((set) => set.PopMode);
-    const PostInfo = useStore((set) => set.thePost);
-    const [postTitle, setPostTitle] = useState(popMode === "add" ? "" : PostInfo?.postTitle || '');
-    const [postBody, setPostBody] = useState(popMode === "add" ? "" : PostInfo?.postBody || '');
-    const setAddPopFalse = useStore((set) => set.setAddPopFalse);
+    const postModalMode = useStore((state) => state.postModalMode);
+    const selectedPost = useStore((state) => state.selectedPost);
+    const [postTitle, setPostTitle] = useState(postModalMode === "add" ? "" : selectedPost?.postTitle || '');
+    const [postBody, setPostBody] = useState(postModalMode === "add" ? "" : selectedPost?.postBody || '');
+    const closePostModal = useStore((state) => state.closePostModal);
     const { mutate: addPost, isPending: addingPost } = useAddPost();
-    const { mutate: editePost, isPending: editingPost } = useEditPost();
+    const { mutate: editPost, isPending: editingPost } = useEditPost();
 
-    const isAdd = popMode === "add";
+    const isAdd = postModalMode === "add";
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    const handleSubmit = (event) => {
+        event.preventDefault();
         if (!postTitle.trim() || !postBody.trim()) return;
 
         if (isAdd) {
             addPost({ postTitle, postBody }, { 
                 onSuccess : ()=>{
-                    setAddPopFalse();
+                    closePostModal();
                     setPostBody("");
                     setPostTitle("");
                     toast.success('تم اضافة المنشور بنجاح')
                 }
-                , onError : (e)=>{
-                    toast.error(e.message)
+                , onError : (error)=>{
+                    toast.error(error.message)
                 } });
         } else {
-            editePost({ id: PostInfo?._id, inputForm: { postTitle, postBody } }, {   onSuccess : ()=>{
-                    setAddPopFalse();
+            editPost({ id: selectedPost?._id, inputForm: { postTitle, postBody } }, {   onSuccess : ()=>{
+                    closePostModal();
                     setPostBody("");
                     setPostTitle("");
                     toast.success('تم تعديل المنشور بنجاح')
                 }
-                , onError : (e)=>{
-                    toast.error(e.message)
+                , onError : (error)=>{
+                    toast.error(error.message)
                 } 
             });
         }
@@ -50,7 +50,7 @@ export default function AddPostModal() {
             <div className="bg-white border border-stone-200/80 rounded-2xl w-full max-w-lg p-7 relative" role="dialog" aria-modal="true">
 
                 <button
-                    onClick={setAddPopFalse}
+                    onClick={closePostModal}
                     className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-md text-stone-400 hover:text-stone-900 hover:bg-stone-50 transition-colors text-sm"
                     aria-label="Close"
                 >✕</button>
@@ -76,7 +76,7 @@ export default function AddPostModal() {
                         <input
                             type="text"
                             value={postTitle}
-                            onChange={(e) => setPostTitle(e.target.value)}
+                            onChange={(event) => setPostTitle(event.target.value)}
                             placeholder="أدخل عنواناً..."
                             required
                             className={fieldClass}
@@ -89,7 +89,7 @@ export default function AddPostModal() {
                         <textarea
                             rows={5}
                             value={postBody}
-                            onChange={(e) => setPostBody(e.target.value)}
+                            onChange={(event) => setPostBody(event.target.value)}
                             placeholder="اكتب تفاصيل المنشور هنا..."
                             required
                             className={`${fieldClass} resize-none`}
@@ -99,7 +99,7 @@ export default function AddPostModal() {
 
                     <div className="flex items-center justify-end gap-2 pt-3">
                         <button
-                            onClick={setAddPopFalse}
+                            onClick={closePostModal}
                             type="button"
                             className="px-4 py-2 rounded-lg text-[13px] text-stone-600 border border-stone-200 hover:border-stone-400 hover:bg-stone-50 transition-colors"
                             style={{ fontFamily: SANS }}

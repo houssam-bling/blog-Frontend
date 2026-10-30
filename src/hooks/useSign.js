@@ -1,40 +1,45 @@
 import {useMutation,useQueryClient} from '@tanstack/react-query'
 import  {api} from '../services/axios';
 
-const signUp = async function (inputForm)
+const signUp = async function (registrationDetails)
 {
     const response = await api.post("/auth/SignUp",
         {
-            fullname:inputForm.fullname,
-            email:inputForm.email,
-            password:inputForm.password,
-            gender:inputForm.gender,
+            fullname:registrationDetails.fullname,
+            email:registrationDetails.email,
+            password:registrationDetails.password,
+            gender:registrationDetails.gender,
         }
     )
     return response.data;
 }
 export function useSignUp()
 {
-    const qc = useQueryClient();
-    return useMutation({mutationFn:(inputForm)=>signUp(inputForm),onSuccess:()=>qc.invalidateQueries({queryKey:['accounts']})})
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (registrationDetails) => signUp(registrationDetails),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['accounts'] })
+    })
 }
-const signIn = async function (inputForm)
+const signIn = async function (credentials)
 {
     const response = await api.post("/auth/SignIn",
         {
-            email:inputForm.email,
-            password:inputForm.password,
+            email:credentials.email,
+            password:credentials.password,
         }
     )
     return response.data;
 }
 export function useSignIn()
 {
-    return useMutation({mutationFn:(inputForm)=>signIn(inputForm)})
+    return useMutation({ mutationFn: (credentials) => signIn(credentials) })
 }
 
-const Logout = async()=> (await api.post('/auth/LogOut')).data;
+const logout = async () => (await api.post('/auth/LogOut')).data;
 
-export const useLogout = ()=> {const qc = useQueryClient();return useMutation({mutationFn:Logout,onSuccess:()=>qc.clear()})}
-
+export const useLogout = () => {
+    const queryClient = useQueryClient();
+    return useMutation({ mutationFn: logout, onSuccess: () => queryClient.clear() });
+}
 

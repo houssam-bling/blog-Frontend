@@ -1,7 +1,7 @@
 import {useQuery,useMutation,useQueryClient,keepPreviousData} from '@tanstack/react-query'
 import {api} from '../services/axios';
 
-const handleLogic = ({postId,userId,posts,action})=>
+export const handleLogic = ({postId,userId,posts,action})=>
 {
     if (!userId) return posts;
     if(!Array.isArray(posts))
@@ -16,7 +16,7 @@ const handleLogic = ({postId,userId,posts,action})=>
     {
         if(hasLike)
         {
-            return posts.map((post)=> post._id === postId ? {...post,likes:[...post.likes.filter((user)=>user !== userId)]
+            return posts.map((post)=> post._id === postId ? {...post,likes:[...post.likes.filter((likedUserId)=>likedUserId !== userId)]
                 ,dislikes:[...post.dislikes,userId]} : post)
         }
         else
@@ -27,7 +27,7 @@ const handleLogic = ({postId,userId,posts,action})=>
             }
             else
             {
-                return posts.map((post)=> post._id === postId ? {...post,dislikes:[...post.dislikes.filter((user)=>user !== userId)]} : post)
+                return posts.map((post)=> post._id === postId ? {...post,dislikes:[...post.dislikes.filter((dislikedUserId)=>dislikedUserId !== userId)]} : post)
             }
         }
     }
@@ -35,7 +35,7 @@ const handleLogic = ({postId,userId,posts,action})=>
     {
         if(hasDislike)
         {
-            return posts.map((post)=> post._id === postId ? {...post,dislikes:[...post.dislikes.filter((user)=>user !== userId)]
+            return posts.map((post)=> post._id === postId ? {...post,dislikes:[...post.dislikes.filter((dislikedUserId)=>dislikedUserId !== userId)]
                 ,likes:[...post.likes,userId]} : post)
         }
         else
@@ -46,7 +46,7 @@ const handleLogic = ({postId,userId,posts,action})=>
             }
             else
             {
-                return posts.map((post)=> post._id === postId ? {...post,likes:[...post.likes.filter((user)=>user !== userId)]} : post)
+                return posts.map((post)=> post._id === postId ? {...post,likes:[...post.likes.filter((likedUserId)=>likedUserId !== userId)]} : post)
             }
         }
     }
@@ -62,100 +62,102 @@ const getMyPosts = async ()=>(await api.get('/posts/me')).data
 
 export const useGetMyPosts =  ()=> useQuery({queryKey:["Posts","me"],queryFn:getMyPosts});
 
-const getSinglePost = async (id)=> (await api.get(`/posts/${id}`)).data
+const getSinglePost = async (postId) => (await api.get(`/posts/${postId}`)).data
 
-export const useGetSinglePost = (id)=> useQuery({queryKey:["Posts",id],queryFn:()=>getSinglePost(id)})
+export const useGetSinglePost = (postId) => useQuery({queryKey:["Posts",postId],queryFn:()=>getSinglePost(postId)})
 
-const addPost = async (inputForm)=>(await api.post('/posts',inputForm)).data
+const addPost = async (postInput) => (await api.post('/posts', postInput)).data
 
 export const useAddPost = function()
 {
-    const qc = useQueryClient()
-    return useMutation({mutationFn:(inputForm)=>addPost(inputForm),
+    const queryClient = useQueryClient()
+    return useMutation({mutationFn:(postInput)=>addPost(postInput),
         onSuccess:()=>
             {
-                qc.invalidateQueries({queryKey:["Posts"]})
-                qc.invalidateQueries({ queryKey: ["profileStates"] });
-                qc.invalidateQueries({ queryKey: ["adminStates"] });
+                queryClient.invalidateQueries({queryKey:["Posts"]})
+                queryClient.invalidateQueries({ queryKey: ["profileStates"] });
+                queryClient.invalidateQueries({ queryKey: ["adminStates"] });
             }} )
 }
-const likePost = async ({id})=> (await api.patch(`/posts/${id}/Like`)).data
+const likePostRequest = async ({ id: postId }) => (await api.patch(`/posts/${postId}/Like`)).data
 
 export const useLikePost = function()
 {
-    const qc = useQueryClient()
-    return useMutation({mutationFn:({id})=>likePost({id}),
-        onMutate:async({id,userId})=>
+    const queryClient = useQueryClient()
+    return useMutation({mutationFn:({ id: postId })=>likePostRequest({ id: postId }),
+        onMutate:async({ id: postId, userId })=>
         {
-            const oldData = qc.getQueriesData({queryKey:['Posts']})
-            await qc.cancelQueries({queryKey:["Posts"]});
-            qc.setQueriesData({queryKey:["Posts"]},(old)=>{
-                if(!old) return
-                if(old.Posts) return {...old,Posts:handleLogic({postId:id,userId:userId,posts:old.Posts,action:"like"})}
-                if(Array.isArray(old)) return handleLogic({postId:id,userId:userId,posts:old,action:"like"})
-                if(old.post) return {...old,post:handleLogic({postId:id,userId:userId,posts:old.post,action:"like"})[0]}
+            const previousQueries = queryClient.getQueriesData({queryKey:['Posts']})
+            await queryClient.cancelQueries({queryKey:["Posts"]});
+            queryClient.setQueriesData({queryKey:["Posts"]},(cachedData)=>{
+                if(!cachedData) return
+                if(cachedData.Posts) return {...cachedData,Posts:handleLogic({postId,userId,posts:cachedData.Posts,action:"like"})}
+                if(Array.isArray(cachedData)) return handleLogic({postId,userId,posts:cachedData,action:"like"})
+                if(cachedData.post) return {...cachedData,post:handleLogic({postId,userId,posts:cachedData.post,action:"like"})[0]}
             })
-            return {oldData}
+            return { previousQueries }
         },
-        onError:(error,variables,context)=>{
+        onError:(error,mutationVariables,context)=>{
 
-            if (context?.oldData) {
-                    context.oldData.forEach(([queryKey, data]) => qc.setQueryData(queryKey, data));
+            if (context?.previousQueries) {
+                    context.previousQueries.forEach(([queryKey, cachedData]) => queryClient.setQueryData(queryKey, cachedData));
                 }
             },
-        onSettled: () => qc.invalidateQueries({queryKey:["Posts"]})
+        onSettled: () => queryClient.invalidateQueries({queryKey:["Posts"]})
 
     },)
 }
-const disLikesPost = async ({id})=>(await api.patch(`/posts/${id}/Dislike`)).data
+const dislikePostRequest = async ({ id: postId }) => (await api.patch(`/posts/${postId}/Dislike`)).data
 
-export const useDisLikesPost = function()
+export const useDislikePost = function()
 {
-    const qc = useQueryClient()
-    return useMutation({mutationFn:({id})=>disLikesPost({id}),
-        onMutate:async({id,userId})=>
+    const queryClient = useQueryClient()
+    return useMutation({mutationFn:({ id: postId })=>dislikePostRequest({ id: postId }),
+        onMutate:async({ id: postId, userId })=>
         {
-            const oldData = qc.getQueriesData({queryKey:['Posts']})
-            await qc.cancelQueries({queryKey:["Posts"]});
-            qc.setQueriesData({queryKey:["Posts"]},(old)=>{
-                if(!old) return
-                if(old.Posts) return {...old,Posts:handleLogic({postId:id,userId:userId,posts:old.Posts,action:"dislike"})}
-                if(Array.isArray(old)) return handleLogic({postId:id,userId:userId,posts:old,action:"dislike"})
-                if(old.post) return {...old,post:handleLogic({postId:id,userId:userId,posts:old.post,action:"dislike"})[0]}
+            const previousQueries = queryClient.getQueriesData({queryKey:['Posts']})
+            await queryClient.cancelQueries({queryKey:["Posts"]});
+            queryClient.setQueriesData({queryKey:["Posts"]},(cachedData)=>{
+                if(!cachedData) return
+                if(cachedData.Posts) return {...cachedData,Posts:handleLogic({postId,userId,posts:cachedData.Posts,action:"dislike"})}
+                if(Array.isArray(cachedData)) return handleLogic({postId,userId,posts:cachedData,action:"dislike"})
+                if(cachedData.post) return {...cachedData,post:handleLogic({postId,userId,posts:cachedData.post,action:"dislike"})[0]}
             })
-            return {oldData}
+            return { previousQueries }
         },
-        onError:(error,variables,context)=>{
+        onError:(error,mutationVariables,context)=>{
 
-            if (context?.oldData) {
-                    context.oldData.forEach(([queryKey, data]) => qc.setQueryData(queryKey, data));
+            if (context?.previousQueries) {
+                    context.previousQueries.forEach(([queryKey, cachedData]) => queryClient.setQueryData(queryKey, cachedData));
                 }
             },
-        onSettled: () => qc.invalidateQueries({queryKey:["Posts"]})
+        onSettled: () => queryClient.invalidateQueries({queryKey:["Posts"]})
 
     },)
 } 
 
 
-const editPost = async({id,inputForm})=> (await api.patch(`/posts/${id}`,{...inputForm})).data
+const editPost = async({ id: postId, inputForm: postUpdates }) =>
+    (await api.patch(`/posts/${postId}`, { ...postUpdates })).data
 
 export const useEditPost = function()
 {
-    const qc = useQueryClient()
-    return useMutation({mutationFn:({id,inputForm})=>editPost({id,inputForm}),onSuccess:()=>{qc.invalidateQueries({queryKey:["Posts"]})}} )
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: ({ id: postId, inputForm: postUpdates }) => editPost({ id: postId, inputForm: postUpdates }),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["Posts"] })
+    })
 }
 
-const deletePost = async(id)=> (await api.delete(`/posts/${id}`)).data
+const deletePost = async(postId) => (await api.delete(`/posts/${postId}`)).data
 
 export const useDeletePost = function()
 {
-    const qc = useQueryClient()
-    return useMutation({mutationFn:(id)=>deletePost(id),
+    const queryClient = useQueryClient()
+    return useMutation({mutationFn:(postId)=>deletePost(postId),
         onSuccess:()=>{
-            qc.invalidateQueries({queryKey:["Posts"]})
-            qc.invalidateQueries({ queryKey: ["profileStates"] });
-            qc.invalidateQueries({ queryKey: ["adminStates"] });
+            queryClient.invalidateQueries({queryKey:["Posts"]})
+            queryClient.invalidateQueries({ queryKey: ["profileStates"] });
+            queryClient.invalidateQueries({ queryKey: ["adminStates"] });
         }} )
 }
-
-

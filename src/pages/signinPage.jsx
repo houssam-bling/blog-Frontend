@@ -16,20 +16,23 @@ const fieldClass = "w-full bg-white border border-stone-200 rounded-lg px-3.5 py
 
 export default function SignPage() {
     const { register, handleSubmit } = useForm({ defaultValues: { email: '', password: '', } })
-    const { mutate, isPending } = useSignIn()
-    const setIsLogin = useStore((set) => set.setIsLogin);
+    const { mutate: signIn, isPending: isSigningIn } = useSignIn()
+    const setIsLoggedIn = useStore((state) => state.setIsLoggedIn);
 
     const navigate = useNavigate();
-    const onSubmit = (input) => {
-        mutate(input, {
-            onSuccess: (data) => {
+    const handleSignIn = (credentials) => {
+        signIn(credentials, {
+            onSuccess: (authResponse) => {
                 toast.success('تم الدخول بنجاح')
                 localStorage.setItem('isLogin',true)
-                setIsLogin(true)
-                localStorage.setItem("Token", data.token)
+                setIsLoggedIn(true)
+                localStorage.setItem("Token", authResponse.token)
                 navigate("/")
             },
-            onError: (e) => { toast.error(e.message),setIsLogin(false) },
+            onError: (error) => {
+                toast.error(error.message);
+                setIsLoggedIn(false);
+            },
         })
     }
 
@@ -53,7 +56,7 @@ export default function SignPage() {
                         أهلاً بعودتك.
                     </p>
 
-                    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+                    <form className="space-y-4" onSubmit={handleSubmit(handleSignIn)}>
                         <div>
                             <label className="block text-[11px] text-stone-500 mb-1.5 tracking-wide" style={{ fontFamily: SANS }}>البريد الإلكتروني</label>
                             <input
@@ -79,12 +82,12 @@ export default function SignPage() {
                         </div>
 
                         <button
-                            disabled={isPending}
+                            disabled={isSigningIn}
                             type="submit"
                             className="w-full bg-stone-800 hover:bg-stone-900 disabled:opacity-60 text-white font-medium py-2.5 rounded-lg transition-colors text-[13px] mt-3"
                             style={{ fontFamily: SANS }}
                         >
-                            {isPending ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
+                            {isSigningIn ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
                         </button>
                     </form>
                 </div>

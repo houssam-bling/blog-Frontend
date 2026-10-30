@@ -5,7 +5,7 @@ import App from './App.jsx'
 import {BrowserRouter} from 'react-router'
 import {QueryClientProvider,QueryClient} from '@tanstack/react-query'
 
-const queryclient = new QueryClient({
+const queryClient = new QueryClient({
   defaultOptions:{
     queries:{
       staleTime : 1000 * 60 * 1,
@@ -16,7 +16,7 @@ const queryclient = new QueryClient({
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      <QueryClientProvider client={queryclient}>
+      <QueryClientProvider client={queryClient}>
         <App />
       </QueryClientProvider>
     </BrowserRouter>

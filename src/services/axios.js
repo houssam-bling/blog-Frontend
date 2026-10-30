@@ -43,7 +43,7 @@ api.interceptors.response.use(
                 catch(refreshError)
                 {
                     localStorage.removeItem('Token');
-                    useStore.getState().logout();
+                    useStore.getState().clearStoredAuth();
                     return Promise.reject(refreshError);
                 }
             }

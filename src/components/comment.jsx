@@ -6,38 +6,42 @@ import { useDeleteCommentById, useUpdateCommentById } from '../hooks/useComment.
 
 export default function Comment({ comment }) {
     const [showMenu, setShowMenu] = useState(false);
-    const [mode, setMode] = useState("read");
-    const [Comment, setComment] = useState(comment?.commentText);
-    const { data: theUser } = useGetProfile();
+    const [editMode, setEditMode] = useState("read");
+    const [commentText, setCommentText] = useState(comment?.commentText);
+    const { data: profileData } = useGetProfile();
     const { mutate: deleteComment } = useDeleteCommentById();
     const { mutate: updateComment,isPending:editingPending } = useUpdateCommentById();
 
     const authorId = typeof comment?.author === 'object' ? comment?.author?._id : comment?.author;
-    const currentUserId = theUser?.user?._id;
+    const currentUserId = profileData?.user?._id;
     const isMyComment = authorId && currentUserId && authorId === currentUserId;
 
 
     const handleDeleteComment = () => {
         if (!window.confirm("are you sure ?")) return;
-        deleteComment({ id: comment?._id }, { onSuccess: () => toast.success('تم حذف التعليق بنجاح'), onError: (e) => toast.error(e.message) });
+        deleteComment({ id: comment?._id }, { onSuccess: () => toast.success('تم حذف التعليق بنجاح'), onError: (error) => toast.error(error.message) });
     };
 
     const handleUpdateComment = () => {
-        setMode("edit");
+        setEditMode("edit");
     };
 
     const handleSave = () => {
-        if(Comment === comment?.commentText)
+        if (commentText === comment?.commentText)
         {
-            setMode("read");
+            setEditMode("read");
             return
         }
-        updateComment({ id: comment._id, inputForm:{commentText: Comment} },{ onSuccess: () => toast.success('تم تعديل التعليق بنجاح'), onError: (e) => toast.error(e.message),onSettled:()=> setMode("read")});
+        updateComment({ id: comment._id, inputForm: { commentText } }, {
+            onSuccess: () => toast.success('تم تعديل التعليق بنجاح'),
+            onError: (error) => toast.error(error.message),
+            onSettled: () => setEditMode("read")
+        });
     };
 
     const handleCancel = () => {
-        setComment(comment?.commentText);
-        setMode("read");
+        setCommentText(comment?.commentText);
+        setEditMode("read");
     };
 
     const handleReportComment = () => {
@@ -47,7 +51,7 @@ export default function Comment({ comment }) {
 
     const initials = (comment?.author?.fullname || "؟")
         .split(" ")
-        .map((n) => n[0])
+        .map((namePart) => namePart[0])
         .slice(0, 2)
         .join("")
         .toUpperCase();
@@ -125,7 +129,7 @@ export default function Comment({ comment }) {
                         </div>
                     </div>
 
-                    {mode === "read" ? (
+                    {editMode === "read" ? (
                         <p
                             className="text-[15px] leading-[1.7] text-stone-700 whitespace-pre-line wrap-anywhere"
                             style={{ fontFamily: BODY }}
@@ -137,8 +141,8 @@ export default function Comment({ comment }) {
                             <input
                                 className="w-full px-3 py-2 border border-stone-300 rounded-lg text-[15px] text-stone-700 focus:outline-none focus:border-stone-800"
                                 style={{ fontFamily: BODY }}
-                                value={Comment}
-                                onChange={(e) => setComment(e.target.value)}
+                                value={commentText}
+                                onChange={(event) => setCommentText(event.target.value)}
                             />
                             <div className="flex items-center gap-2">
                                 <button

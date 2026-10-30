@@ -2,34 +2,32 @@ import {useMutation,useQuery,useQueryClient} from '@tanstack/react-query';
 import {api} from '../services/axios'
 import {useStore} from '../store/store'
 
-const editeUser = async (inputForm)=> (await api.patch('/users/update',{...inputForm})).data;
+const updateUser = async (userUpdates) => (await api.patch('/users/update', { ...userUpdates })).data;
 
-export const useEditeUser = function()
+export const useUpdateUser = function()
 {
-    const qc = useQueryClient(); 
+    const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (inputForm) => editeUser(inputForm),
-        onSuccess: () => qc.invalidateQueries({ queryKey: ['profile'] })
+        mutationFn: (userUpdates) => updateUser(userUpdates),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['profile'] })
     });
 };
-const deleteUser = async (id)=> (await api.delete(`/users/${id}`)).data;
+const deleteUser = async (userId) => (await api.delete(`/users/${userId}`)).data;
 
 export const useDeleteUser = function()
 {
-    const qc = useQueryClient(); 
+    const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (id) => deleteUser(id),
-        onSuccess: () => qc.invalidateQueries({ queryKey: ['users'] })
+        mutationFn: (userId) => deleteUser(userId),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] })
     });
 };
 const getProfile = async ()=> (await api.get('/users/me')).data;
 
 export const useGetProfile = ()=> {
-    const isLogin = useStore((s) => s.isLogin);
-    return useQuery({queryKey: ['profile'],queryFn: getProfile,retry:false,enabled:!!isLogin})
+    const isLoggedIn = useStore((state) => state.isLoggedIn);
+    return useQuery({queryKey: ['profile'],queryFn: getProfile,retry:false,enabled:!!isLoggedIn})
 }
 const getAllUsers = async ()=> (await api.get('/users/all')).data;
 
 export const useGetAllUsers =  ()=> useQuery({queryKey:["users"],queryFn:getAllUsers});
-
-

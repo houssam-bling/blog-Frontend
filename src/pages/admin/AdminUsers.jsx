@@ -4,18 +4,18 @@ import { toast } from 'react-hot-toast';
 
 export default function AdminUsers() {
 
-    const { data, isLoading, isError, error } = useGetAllUsers();
+    const { data: usersData, isLoading, isError, error } = useGetAllUsers();
     const { mutate: deleteUser, isPending: isDeleting } = useDeleteUser();
 
-    const users = data?.users || [];
+    const users = usersData?.users || [];
 
     // 2. دالة الحذف
-    const handleDelete = (id) => {
+    const handleDelete = (userId) => {
         if (!window.confirm("هل أنت متأكد من حذف هذا المستخدم؟")) return;
         
-        deleteUser(id, {
+        deleteUser(userId, {
             onSuccess: () => toast.success("تم حذف المستخدم بنجاح"),
-            onError: (e) => toast.error(e.message || "حدث خطأ أثناء الحذف")
+            onError: (error) => toast.error(error.message || "حدث خطأ أثناء الحذف")
         });
     };
 

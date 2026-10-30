@@ -1,22 +1,21 @@
 import { MONO, DISPLAY, SANS, BODY, CLAY, SAGE, DUSTY } from '../../utils/tokens';
-import { useGetAllUsers } from '../../hooks/useUser';
 import { useGetAllPosts } from '../../hooks/usePost';
 import { useGetAllComments } from '../../hooks/useComment';
 import { useGetAdminStates } from '../../hooks/useState';
 
 export default function AdminOverview() {
     // 1. جلب البيانات4
-        const {data,isLoading,isError,error} = useGetAdminStates()
+    const { data: adminStats, isLoading } = useGetAdminStates()
 
     const { data: postsData, isLoading: loadingPosts } = useGetAllPosts({ page: 1, limit: 5 });
-    const { data: CommentData, isLoading: loadingComments } = useGetAllComments({ page: 1, limit: 5 });
+    const { data: commentsData, isLoading: loadingComments } = useGetAllComments({ page: 1, limit: 5 });
 
-    const usersCount = data?.userCount || 0;
-    const commentsCount = data?.commentCount || 0;
-    const postsCount = data?.postCount || 0;
+    const usersCount = adminStats?.userCount || 0;
+    const commentsCount = adminStats?.commentCount || 0;
+    const postsCount = adminStats?.postCount || 0;
     
     const recentPosts = postsData?.Posts?.slice(0, 2) || [];
-    const recentComments = CommentData?.Comments?.slice(0, 2) || [];
+    const recentComments = commentsData?.Comments?.slice(0, 2) || [];
 
     // 2. إعداد الكروت
     const stats = [
@@ -40,8 +39,8 @@ export default function AdminOverview() {
 
             {/* ── Stat Cards (3 Cards) ──────────────────── */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {stats.map((stat, i) => (
-                    <div key={i} className="bg-white border border-stone-300 p-6 flex flex-col justify-between min-h-[140px]">
+                {stats.map((stat, statIndex) => (
+                    <div key={statIndex} className="bg-white border border-stone-300 p-6 flex flex-col justify-between min-h-[140px]">
                         <div className="h-1 w-8 mb-6" style={{ backgroundColor: stat.color }}></div>
                         <div>
                             <h3 className="text-[42px] leading-none font-medium text-stone-900 mb-2 tracking-tighter" style={{ fontFamily: MONO }}>

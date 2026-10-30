@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import { useState } from "react";
-import { useDeletePost, useDisLikesPost, useLikePost } from '../hooks/usePost';
+import { useDeletePost, useDislikePost, useLikePost } from '../hooks/usePost';
 import CommentBox from './CommentBox.jsx'
 import { useStore } from '../store/store.js';
 import { toast } from "react-hot-toast";
@@ -23,18 +23,18 @@ export default function Post({ post }) {
 
     const [showComment, setShowComment] = useState(false);
     const [showMenu, setShowMenu] = useState(false);    
-    const {data:theUser} = useGetProfile();
+    const { data: profileData } = useGetProfile();
     const authorId = typeof author === 'object' ? author?._id : author;
-    const currentUserId = theUser?.user?._id;
+    const currentUserId = profileData?.user?._id;
     const isMyPost = authorId && currentUserId && authorId === currentUserId;
 
-    const { mutate: LikePost,isPending:LikePending } = useLikePost();
-    const { mutate: Dislike,isPending:DisLikePending } = useDisLikesPost();
+    const { mutate: likePost, isPending: isLikePending } = useLikePost();
+    const { mutate: dislikePost, isPending: isDislikePending } = useDislikePost();
     const { mutate: deletePost } = useDeletePost();
 
-    const setAddPopTrue = useStore((s) => s.setAddPopTrue);
-    const setPopMode = useStore((s) => s.setPopMode);
-    const setThePost = useStore((s) => s.setThePost);
+    const openPostModal = useStore((state) => state.openPostModal);
+    const setPostModalMode = useStore((state) => state.setPostModalMode);
+    const setSelectedPost = useStore((state) => state.setSelectedPost);
 
     const publishDate = new Date(createdAt).toLocaleDateString("ar-EG", {
             year: "numeric", month: "long", day: "numeric",
@@ -42,26 +42,24 @@ export default function Post({ post }) {
     });
 
 
-    const handleLike = () => LikePost({ id: _id,userId:currentUserId }, {onSuccess:()=>{
+    const handleLike = () => likePost({ id: _id, userId: currentUserId }, { onSuccess: () => {
             toast.success('تم اضافة اعجاب بنجاح')
-        }, onError: (e) =>toast.error(e.message)})
-    const handleDislike = () => Dislike({ id: _id,userId:currentUserId  }, {onSuccess:()=>{
+        }, onError: (error) => toast.error(error.message) });
+    const handleDislike = () => dislikePost({ id: _id, userId: currentUserId }, { onSuccess: () => {
             toast.success('تم اضافة عدم اعجاب بنجاح')
-        }, onError: (e) =>toast.error(e.message)});
+        }, onError: (error) => toast.error(error.message) });
 
-
-    const handleDeletPost = () => {
+    const handleDeletePost = () => {
         if (!window.confirm("are you sure ?")) return;
-        deletePost(_id, {onSuccess:()=>{
+        deletePost(_id, { onSuccess: () => {
             toast.success('تم حذف المنشور بنجاح')
-        }, onError: (e) =>toast.error(e.message)
-    } )
+        }, onError: (error) => toast.error(error.message) });
     };
 
     const handleEditPost = () => {
-        setPopMode("edit");
-        setThePost(post);
-        setAddPopTrue();
+        setPostModalMode("edit");
+        setSelectedPost(post);
+        openPostModal();
     };
 
     return (
@@ -108,7 +106,7 @@ export default function Post({ post }) {
                                         Edit
                                     </button>
                                     <button
-                                        onClick={() => { setShowMenu(false); handleDeletPost(); }}
+                                        onClick={() => { setShowMenu(false); handleDeletePost(); }}
                                         className="w-full text-left px-3.5 py-2 text-[12px] hover:bg-[#fbf1ee] transition-colors"
                                         style={{ color: ROSE }}
                                     >
@@ -147,7 +145,7 @@ export default function Post({ post }) {
 
             {/* ── Actions ───────────────────────────── */}
             <div className="flex items-center gap-1 px-3 pb-2">
-                <button disabled={LikePending}
+                <button disabled={isLikePending}
                     onClick={handleLike}
                     className="group flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[13px] text-stone-500 transition-colors hover:bg-[#f0f4ee]"
                 >
@@ -159,7 +157,7 @@ export default function Post({ post }) {
 
                 <button
                     onClick={handleDislike}
-                    disabled={DisLikePending}
+                    disabled={isDislikePending}
                     className="group flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[13px] text-stone-500 transition-colors hover:bg-[#f8eff0]"
                 >
                     <span className="text-[12px] transition-colors group-hover:text-(--rose)" style={{ '--rose': ROSE }}>↓</span>

@@ -10,13 +10,13 @@ import { useGetProfileStates } from "../hooks/useState";
 
 export default function ProfilePage() {
     const navigate = useNavigate();
-    const {data,isLoading,isError,error} = useGetProfile()
-    const {data:states} = useGetProfileStates()
+    const { data: profileData, isLoading, isError, error } = useGetProfile()
+    const { data: profileStats } = useGetProfileStates()
 
-    const user = data?.user || {};
-    const setediteUserPopTrue = useStore((state) => state.setediteUserPopTrue);
+    const user = profileData?.user || {};
+    const openEditUserModal = useStore((state) => state.openEditUserModal);
 
-    const initials = user?.fullname?.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() || '??';
+    const initials = user?.fullname?.split(" ").map((namePart) => namePart[0]).slice(0, 2).join("").toUpperCase() || '??';
     const joinDate = new Date(user?.createdAt).toLocaleDateString("ar-EG", {
         year: "numeric", month: "long", day: "numeric",
     });
@@ -79,7 +79,7 @@ export default function ProfilePage() {
                 {/* Actions */}
                 <div className="flex flex-col sm:flex-row gap-2 mt-6">
                     <button
-                        onClick={setediteUserPopTrue}
+                        onClick={openEditUserModal}
                         className="flex-1 bg-stone-800 hover:bg-stone-900 text-white px-5 py-2.5 rounded-lg text-[13px] font-medium transition-colors"
                         style={{ fontFamily: SANS }}
                     >تعديل الملف الشخصي</button>
@@ -92,9 +92,9 @@ export default function ProfilePage() {
 
                 {/* Stats */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6">
-                    <StatCard label="Posts" value={states?.postCount || 0} />
-                    <StatCard label="Likes" value={states?.likeCount || 0} />
-                    <StatCard label="Comments" value={states?.commentCount || 0} />
+                    <StatCard label="Posts" value={profileStats?.postCount || 0} />
+                    <StatCard label="Likes" value={profileStats?.likeCount || 0} />
+                    <StatCard label="Comments" value={profileStats?.commentCount || 0} />
                 </div>
             </div>
         </div>

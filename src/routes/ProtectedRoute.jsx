@@ -1,13 +1,12 @@
-import { useNavigate } from 'react-router';
 import  {useStore} from '../store/store'
 import ErrorMessage from '../pages/errorPage';
 
 
 export default function ProtectedRoute({children})
 {
-    const isLogin = useStore((set)=>set.isLogin);
+    const isLoggedIn = useStore((state) => state.isLoggedIn);
 
-    if(!isLogin) return <ErrorMessage message={"يرجى تسجيل الدخول"}/>
+    if(!isLoggedIn) return <ErrorMessage message={"يرجى تسجيل الدخول"}/>
     
     else
     {

@@ -10,16 +10,16 @@ export default function AdminPosts() {
     const limit = 10; // عدد المنشورات فـ كل صفحة
 
     // 2. جلب البيانات من الـ Hooks ديالك
-    const { data, isLoading, isError, error } = useGetAllPosts({ page, limit });
+    const { data: postsData, isLoading, isError, error } = useGetAllPosts({ page, limit });
     const { mutate: deletePost, isPending: isDeleting } = useDeletePost();
 
     // 3. جلب دوال الـ Store باش نفتحو الـ Modal ديال الإضافة/التعديل
-    const setAddPopTrue = useStore((s) => s.setAddPopTrue);
-    const setPopMode = useStore((s) => s.setPopMode);
-    const setThePost = useStore((s) => s.setThePost);
+    const openPostModal = useStore((state) => state.openPostModal);
+    const setPostModalMode = useStore((state) => state.setPostModalMode);
+    const setSelectedPost = useStore((state) => state.setSelectedPost);
 
-    const posts = data?.Posts || [];
-    const totalPages = data?.TotalPages || 1;
+    const posts = postsData?.Posts || [];
+    const totalPages = postsData?.TotalPages || 1;
 
     // ملي كتقلب للصفحة اللي من بعد، طلع الفوق أوتوماتيكياً
     useEffect(() => {
@@ -27,26 +27,26 @@ export default function AdminPosts() {
     }, [page]);
 
     // 4. دالة الحذف
-    const handleDelete = (id) => {
+    const handleDelete = (postId) => {
         if (!window.confirm("هل أنت متأكد من حذف هذا المنشور؟")) return;
-        deletePost(id, {
+        deletePost(postId, {
             onSuccess: () => toast.success("تم حذف المنشور بنجاح"),
-            onError: (e) => toast.error(e.message || "حدث خطأ أثناء الحذف")
+            onError: (error) => toast.error(error.message || "حدث خطأ أثناء الحذف")
         });
     };
 
     // 5. دالة فتح نافذة التعديل
     const handleEdit = (post) => {
-        setPopMode("edit");
-        setThePost(post);
-        setAddPopTrue();
+        setPostModalMode("edit");
+        setSelectedPost(post);
+        openPostModal();
     };
 
     // 6. دالة فتح نافذة الإضافة
     const handleCreate = () => {
-        setPopMode("add");
-        setThePost(null);
-        setAddPopTrue();
+        setPostModalMode("add");
+        setSelectedPost(null);
+        openPostModal();
     };
 
     // 7. حالات التحميل والخطأ

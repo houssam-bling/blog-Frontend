@@ -15,23 +15,23 @@ const AMBER = "#c99a4a";
 const fieldClass = "w-full bg-white border border-stone-200 rounded-lg px-3.5 py-2.5 text-[14px] text-stone-800 placeholder:text-stone-400 focus:outline-none focus:border-stone-800 transition-colors";
 
 export default function SignUpPage() {
-    const { register, handleSubmit, formState: { errors } } = useForm({
+    const { register, handleSubmit } = useForm({
         defaultValues: { fullname: '', email: '', password: "", gender: '', }
     })
     const navigate = useNavigate();
-    const { mutate, isPending } = useSignUp();
-    const setIsLogin = useStore((set) => set.setIsLogin);
+    const { mutate: signUp, isPending: isSigningUp } = useSignUp();
+    const setIsLoggedIn = useStore((state) => state.setIsLoggedIn);
 
-    const Sumbit = (input) => {
-        mutate(input, {
-            onSuccess: (data) => {
+    const handleSignUp = (registrationDetails) => {
+        signUp(registrationDetails, {
+            onSuccess: (authResponse) => {
                 toast.success('تم التسجيل بنجاح')
-                setIsLogin(true)
+                setIsLoggedIn(true)
                 localStorage.setItem('isLogin',true)
-                localStorage.setItem('Token', data.token)
+                localStorage.setItem('Token', authResponse.token)
                 navigate("/")
             },
-            onError: (e) => { toast.error(e.message);  setIsLogin(false)}
+            onError: (error) => { toast.error(error.message);  setIsLoggedIn(false)}
         })
     }
 
@@ -55,7 +55,7 @@ export default function SignUpPage() {
                         ابدأ بخطوة صغيرة — سطر واحد في كل مرة.
                     </p>
 
-                    <form className="space-y-4" onSubmit={handleSubmit(Sumbit)}>
+                    <form className="space-y-4" onSubmit={handleSubmit(handleSignUp)}>
 
                         <div>
                             <label className="block text-[11px] text-stone-500 mb-1.5 tracking-wide" style={{ fontFamily: SANS }}>الاسم الكامل</label>
@@ -106,12 +106,12 @@ export default function SignUpPage() {
                         </div>
 
                         <button
-                            disabled={isPending}
+                            disabled={isSigningUp}
                             type="submit"
                             className="w-full bg-stone-800 hover:bg-stone-900 disabled:opacity-60 text-white font-medium py-2.5 rounded-lg transition-colors text-[13px] mt-3"
                             style={{ fontFamily: SANS }}
                         >
-                            {isPending ? 'جاري الانتظار...' : 'إنشاء الحساب'}
+                            {isSigningUp ? 'جاري الانتظار...' : 'إنشاء الحساب'}
                         </button>
                     </form>
                 </div>
