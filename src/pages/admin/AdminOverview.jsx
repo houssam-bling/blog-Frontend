@@ -40,7 +40,7 @@ export default function AdminOverview() {
             {/* ── Stat Cards (3 Cards) ──────────────────── */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {stats.map((stat, statIndex) => (
-                    <div key={statIndex} className="bg-white border border-stone-300 p-6 flex flex-col justify-between min-h-[140px]">
+                    <div key={statIndex} className="bg-white border border-stone-300 p-6 flex flex-col justify-between min-h-35">
                         <div className="h-1 w-8 mb-6" style={{ backgroundColor: stat.color }}></div>
                         <div>
                             <h3 className="text-[42px] leading-none font-medium text-stone-900 mb-2 tracking-tighter" style={{ fontFamily: MONO }}>

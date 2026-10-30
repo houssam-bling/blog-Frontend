@@ -151,6 +151,18 @@ export default function NavBar() {
                     <Link to="/" onClick={closeMenu} className="px-3 py-2.5 rounded-md text-[13px] text-stone-700 hover:bg-stone-50 no-underline transition-colors" style={{ fontFamily: SANS }}>الرئيسية</Link>
                     {isLoggedIn && <Link to="/profile" onClick={closeMenu} className="px-3 py-2.5 rounded-md text-[13px] text-stone-700 hover:bg-stone-50 no-underline transition-colors" style={{ fontFamily: SANS }}>الملف الشخصي</Link>}
 
+                    {/* Admin dashboard — mobile */}
+                    {isAdmin && (
+                        <Link
+                            to="/admin"
+                            onClick={closeMenu}
+                            className="px-3 py-2.5 rounded-md text-[13px] text-stone-700 hover:bg-stone-50 no-underline transition-colors"
+                            style={{ fontFamily: SANS }}
+                        >
+                            لوحة التحكم
+                        </Link>
+                    )}
+
                     <div className="h-px bg-stone-100 my-2" />
 
                     {isLoggedIn && (
